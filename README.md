@@ -7,6 +7,8 @@ cell-for-cell against a golden workbook after recalculation.
 
 ## Approach
 
+**Status:** project scaffold only; the architecture below is proposed, not yet implemented or measured. Start with [PROJECT.md](PROJECT.md), [BASELINE.md](BASELINE.md) and [MEMORY.md](MEMORY.md). Claude Code should read [CLAUDE.md](CLAUDE.md); shared development instructions are in [AGENTS.md](AGENTS.md).
+
 A code-executing agent around the fixed competition model, Qwen3.8-27B (temperature 0):
 instead of answering from a truncated text dump of the sheet, the model writes a Python
 script that opens the actual workbook, computes the result, and writes plain values into
@@ -38,6 +40,6 @@ docker build -t a1 .
 docker run --rm --env-file .env -v <dataset dir>:/data:ro -v <empty dir>:/out a1
 ```
 
-Copy `.env.example` to `.env` and fill in the team credentials: the model endpoint
-(`A1_API_BASE` + `A1_API_KEY`, from the team's GCP credits) and `TINKER_API_KEY` for
-fine-tuning. Keys never live in the repo.
+The Docker command above is the intended run contract; a Dockerfile has not been implemented yet.
+
+Copy `.env.example` to `.env` and configure only the confirmed team access route. Tinker supports baseline sampling as well as optional fine-tuning. A GCP-hosted model endpoint is not confirmed or required by the supplied instructions. Obtain the exact allowed Qwen3.8-27B API identifier before any model call. Keys never live in the repo.
