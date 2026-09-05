@@ -1,0 +1,58 @@
+{
+  "summary": {
+    "items": 2,
+    "graded": 2,
+    "missing": 0,
+    "errors": 0,
+    "pass_rate": 0.5,
+    "cell_accuracy": 0.843,
+    "pass_rate_cell_level": null,
+    "pass_rate_sheet_level": 0.5
+  },
+  "items": [
+    {
+      "status": "graded",
+      "cells": 120,
+      "correct": 101,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "LISTS!B3",
+          "expected": "2024-02-03 00:00:00",
+          "actual": "2024-02-03 00:00:00"
+        },
+        {
+          "cell": "LISTS!B4",
+          "expected": "2024-02-22 00:00:00",
+          "actual": "2024-02-22 00:00:00"
+        },
+        {
+          "cell": "LISTS!B5",
+          "expected": "2024-02-22 00:00:00",
+          "actual": "2024-02-22 00:00:00"
+        },
+        {
+          "cell": "LISTS!B6",
+          "expected": "2024-03-03 00:00:00",
+          "actual": "2024-03-03 00:00:00"
+        },
+        {
+          "cell": "LISTS!B7",
+          "expected": "2024-03-03 00:00:00",
+          "actual": "2024-03-03 00:00:00"
+        }
+      ],
+      "id": "13-1",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 1,
+      "correct": 1,
+      "pass": true,
+      "mismatches": [],
+      "id": "51-12",
+      "type": "Sheet-Level Manipulation"
+    }
+  ]
+}
