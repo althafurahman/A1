@@ -1,6 +1,6 @@
 # A1 shared working memory
 
-Updated: 2026-09-05 (evening, after smoke tests). Record facts, not assumed progress.
+Updated: 2026-09-05 (evening, after dev16 batch). Record facts, not assumed progress.
 
 ## Current state
 
@@ -24,11 +24,16 @@ Updated: 2026-09-05 (evening, after smoke tests). Record facts, not assumed prog
   - 13-1's 19 misses are all dates: model returned strings like `2024-02-03 00:00:00`, starter writes them as text, golden has real datetimes. Starter README warns about this. Failure category: value typing at write time, not reasoning.
   - Same task/prompt gave 8192+ tokens in run 002 and 5271 in run 003: sampling varies even at temperature 0, as SUBMISSION.md notes.
   - Throughput ~80 output tokens/s per request. Sizing guess for 400 tasks at 24576 cap: 5k-13k output tokens/task -> roughly $15-30 of the $1,000 credits (sample $5.595/M); wall time ~3 h at concurrency 4. Concurrency/rate limits not yet known.
-- Credits spent so far: three sampling calls plus one failed session, roughly $0.20.
+- Dev subset: `experiments/dev16.ids` = 16 tasks, 4 per bucket (cell/sheet x small/large answer range), seeded, excludes smoke ids. Untouched validation subset not yet defined.
+- `submissions/dev16-baseline-001/` (unchanged starter, `--max-tokens 24576 --concurrency 8`, results.json saved): pass_rate 0.625 (10/16), cell_accuracy 0.516, cell-level 7/8, sheet-level 3/8. 0 request/transport failures. 2 truncated at the cap. Elapsed 1219 s (20 min) for 16 tasks; 144k output tokens; est. cost $0.85.
+  - Throughput: aggregate ~118 output tok/s at concurrency 8 vs ~80 tok/s for a single request, so per-request speed fell to ~28 tok/s. Concurrency barely helps; looks like a project-level sampling rate limit. Full-400 projection at this config: ~3.6M output tokens, ~8.5 h, ~$21. Do not run the full 400 until absolutely needed (user decision 2026-09-05).
+  - Failure categories from traces (6 fails): (a) truncation x2: 183-8 reasoning never converged in 24k tokens (weighted-average task), 57232 finished reasoning but ran out of tokens while emitting the 190-cell JSON; (b) row-shift/manipulation errors x2: 230-16 answer shifted one row, 156-14 wrong rows deleted; (c) misread task x1: 263-1 wrote category names instead of totals; (d) near miss x1: 203-15 missed header 'Total' in M1 (38/39). Plus from smoke 13-1: dates written as text.
+  - Interpretation: sheet-level tasks with many cells are where the text-dump-and-enumerate approach fails: the model must reason about and re-emit every cell. Cell-level tasks are already strong.
+- Credits spent so far: about $1.10 across smoke-001..003 and dev16-baseline-001.
 
 ## Open questions
 
-1. Which `--max-tokens` to use for the full baseline: 8192 default demonstrably truncates; 24576 worked on both smoke tasks. Sheet-level tasks with big answer ranges may need more. Decide before the 400 run.
+1. Token cap: 8192 truncates; 24576 still truncates 2/16. Large answer ranges need either a bigger cap or an approach that does not enumerate cells in the reply.
 2. Permitted training-data sources. Claude Code/Codex are development tools only, not solver models.
 3. Judge runtime/resources/API limits; research video/live presentation expectations.
 4. GCP endpoint in old README is unconfirmed and not needed for the Tinker route.
@@ -48,6 +53,7 @@ Claude Code (user's session) edited on branch `baseline-setup`: `.gitignore`, `M
 
 ## Next action
 
-1. Confirm `--max-tokens` and concurrency with the user, then BASELINE step 4: full 400 into fresh `submissions/baseline-full-001/`, run with `2>&1 | tee submissions/baseline-full-001/console.log`.
+1. Treat dev16-baseline-001 (62.5%) as the working baseline reference on the dev subset; the full 400 run is deferred until needed for submission.
+2. Test one change at a time on dev16, each in a fresh `submissions/<name>/` dir: (a) lower reasoning effort renderer (`qwen3_8_low_reasoning`/`medium`) to cut tokens and truncation; (b) code-executing agent per README plan (model writes openpyxl script, runs in Docker) to fix enumeration/row-shift/date-typing failures. Compare against dev16-baseline-001 by pass_rate, tokens and elapsed.
 2. Run BASELINE.md step 3 smoke test (`--ids 13-1,51-12`) from `research/`, then step 4 full 400 into a fresh `submissions/baseline-full-001/` directory, capturing stdout/stderr with `2>&1 | tee`.
 3. Record model, parameters, elapsed time, token usage, errors and the evaluator summary here.
