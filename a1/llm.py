@@ -16,6 +16,10 @@ class LLMError(Exception):
     pass
 
 
+class FatalLLMError(LLMError):
+    """Not worth retrying (bad key, bad request)."""
+
+
 class Client:
     def __init__(self, model: str = MODEL, timeout: float = 420.0):
         key = os.environ.get("OPENROUTER_API_KEY")
@@ -45,6 +49,8 @@ class Client:
                 r = await self._http.post(API_URL, json=payload)
                 if r.status_code in (429, 500, 502, 503, 529):
                     raise LLMError(f"HTTP {r.status_code}: {r.text[:200]}")
+                if 400 <= r.status_code < 500:  # auth/validation: retrying cannot help
+                    raise FatalLLMError(f"HTTP {r.status_code}: {r.text[:200]}")
                 r.raise_for_status()
                 data = r.json()
                 if "error" in data:
@@ -60,6 +66,8 @@ class Client:
                     "latency_ms": int((time.time() - started) * 1000),
                     "error": None,
                 }
+            except FatalLLMError:
+                raise
             except (httpx.HTTPError, LLMError, KeyError) as e:
                 last_err = e
                 await asyncio.sleep(2 ** attempt * 2)

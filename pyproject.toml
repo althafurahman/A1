@@ -12,3 +12,9 @@ dependencies = [
 
 [tool.uv]
 package = false
+
+[project.optional-dependencies]
+tinker = [
+    "tinker>=0.27.1",
+    "tinker-cookbook>=0.5.7",
+]

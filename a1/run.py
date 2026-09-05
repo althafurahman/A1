@@ -40,6 +40,9 @@ def parse_args():
                    help="full = code agent + verify + direct fallback; others for ablations")
     p.add_argument("--model", default=os.environ.get("MODEL", MODEL),
                    help="override for ablations only; the submission model is fixed")
+    p.add_argument("--backend", choices=["openrouter", "tinker"], default="openrouter")
+    p.add_argument("--base-model", default="Qwen/Qwen3-8B", help="tinker backend: tokenizer/renderer base")
+    p.add_argument("--model-path", help="tinker backend: tinker://... sampler checkpoint")
     return p.parse_args()
 
 
@@ -73,8 +76,13 @@ async def main():
         wanted = {i.strip() for i in args.ids.split(",") if i.strip()}
         tasks = [t for t in tasks if t["id"] in wanted]
 
-    client = Client(model=args.model)
-    log(out_dir, f"A1 model={args.model} strategy={args.strategy} tasks={len(tasks)} concurrency={args.concurrency}")
+    if args.backend == "tinker":
+        from .tinker_llm import TinkerClient
+        client = TinkerClient(base_model=args.base_model, model_path=args.model_path)
+    else:
+        client = Client(model=args.model)
+    log(out_dir, f"A1 backend={args.backend} model={client.model} strategy={args.strategy} "
+                 f"tasks={len(tasks)} concurrency={args.concurrency}")
     semaphore = asyncio.Semaphore(args.concurrency)
 
     async def run_one(task):

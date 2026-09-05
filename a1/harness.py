@@ -6,6 +6,10 @@ import shutil
 import time
 from pathlib import Path
 
+
+def clean_status(text: str, cap: int = 180) -> str:
+    return " ".join(str(text).split())[:cap]
+
 import openpyxl
 
 from .coderun import extract_code, run_code
@@ -169,7 +173,7 @@ class TaskRunner:
         try:
             reply = await self._call(system, task_user, "code")
         except LLMError as e:
-            return f"error: {e}"[:200]
+            return f"error: {clean_status(e)}"
         code = extract_code(reply)
         for attempt in range(MAX_REPAIRS + 1):
             if code is None:
@@ -185,11 +189,11 @@ class TaskRunner:
                     return "ok"
                 result = {"ok": False, "stdout": "", "stderr": f"Output was produced, but review found a problem: {verified}"}
             if attempt == MAX_REPAIRS:
-                return f"error: code failed: {result['stderr'][:150]}"
+                return f"error: code failed: {clean_status(result['stderr'], 150)}"
             try:
                 reply = await self._call(system, task_user + "\n\n" + REPAIR_USER.format(**result), "repair")
             except LLMError as e:
-                return f"error: {e}"[:200]
+                return f"error: {clean_status(e)}"
             code = extract_code(reply)
         return "error: unreachable"
 
@@ -216,4 +220,4 @@ class TaskRunner:
             return "ok"
         except (LLMError, ValueError, json.JSONDecodeError, KeyError, TypeError) as e:
             prior = f"{note}; " if note else ""
-            return f"error: {prior}direct fallback failed: {e}"[:200]
+            return clean_status(f"error: {prior}direct fallback failed: {e}", 250)
