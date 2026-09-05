@@ -222,8 +222,12 @@ class TaskRunner:
     async def _verify(self, task_user):
         """True if the reviewer passes the output; otherwise the issue text."""
         region = read_answer_region(self.out_xlsx, self.task)
-        user = (f"{task_user}\n\n## Values the candidate wrote into the answer region\n{region}\n\n"
-                f"Does this satisfy the instruction?")
+        before = read_answer_region(self.task["init_xlsx"], self.task)
+        user = (f"{task_user}\n\n## Answer region BEFORE (in the original workbook)\n{before}\n\n"
+                f"## Answer region AFTER (what the candidate wrote)\n{region}\n\n"
+                f"Compare before and after against the instruction. Watch for content shifted by a row "
+                f"or column relative to where the instruction and the original layout say it belongs. "
+                f"Does the AFTER state satisfy the instruction?")
         try:
             reply = await self._call(VERIFY_SYSTEM, user, "verify")
             verdict = parse_json_reply(reply)

@@ -1,0 +1,1 @@
+A1 backend=tinker model=Qwen/Qwen3.8-27B strategy=full tasks=1 concurrency=1
