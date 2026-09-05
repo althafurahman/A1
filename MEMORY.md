@@ -47,13 +47,50 @@ Updated: 2026-09-05 (evening, after dev16 batch). Record facts, not assumed prog
 - No fine-tuning initially. No UI or additional agent framework.
 - Starter `tinker_predict.py` renderer for Qwen3.8 is a thinking renderer; `--max-tokens 8192` default may need raising if replies truncate (check traces before changing).
 
+## A1 harness results (second Claude Code session, 2026-09-05 evening)
+
+The code-executing agent proposed in the root README is now implemented in `a1/` and measured.
+Pipeline per task: model writes an openpyxl script (INIT/OUT contract, values only) → script runs
+in a scratch dir → mechanical hygiene checks (formula strings, stray whitespace) → LLM verify pass
+shown the answer region BEFORE (init) and AFTER (output) → bounded repair loop (2) → direct
+JSON-answer fallback only if the code path produced no output at all. Backend: Tinker,
+`Qwen/Qwen3.8-27B`, temperature 0, max-tokens 24576. Root `.env` (not `research/.env`) feeds `a1/`.
+
+- `experiments/smoke-a1-001/`: 13-1 and 51-12 both PASS (baseline: 13-1 failed on dates-as-text).
+- `experiments/dev16-a1-001/`: dev16, concurrency 6 — pass_rate 0.875 (14/16), cell_accuracy 0.9865,
+  cell-level 8/8, sheet-level 6/8. 34 model calls (16 code, 17 verify, 1 repair), 207k output tokens,
+  ~24 min, ~$1.29. Both failures near-misses: 230-16 trailing whitespace in text values (7/12),
+  156-14 two cells left empty (154/156).
+- Fixes: whitespace hygiene check + strip rule; verifier now surfaced EMPTY cells and the
+  before/after region comparison (row-shift detection); produced outputs are kept over the fallback;
+  missing answer sheets are created by name, never written to the active sheet.
+- `experiments/fix-check-001/`: 156-14 PASS 156/156. 230-16 regressed to 2/12 via a differently
+  sampled script (row shift; sampling varies at temp 0) — motivated the before/after verifier.
+- `experiments/fix-check-002/`: 230-16 PASS 12/12, first attempt, no repairs.
+- `experiments/dev16-a1-002/`: confirmation run of the final config on dev16 — IN PROGRESS,
+  result to be recorded here.
+- Credits spent by these runs: ~$3.50 total.
+- Cosmetic: tinker's session-futures poller logs "Task was destroyed but it is pending!" at exit;
+  harmless, not yet silenced.
+- Full-400 projection at this config: ~5M output tokens, ~$30, ~9-10 h at the observed rate cap.
+  NOT launched — user decision 2026-09-05 evening: hold pending team discussion. It must start
+  Saturday night to leave margin before the Sunday 12:00 deadline.
+- Code review of PR #1 completed (15 verified findings; top items: research/README quick start +
+  llm_predict default use forbidden DeepSeek, BASELINE.md step-4 omits --max-tokens, BASELINE.md
+  $A1_ALLOWED_MODEL_ID never reaches the shell, root-vs-research .env mismatch). Findings shared
+  with the user; team-authored doc fixes still to apply.
+
 ## Collaboration
 
-Claude Code (user's session) edited on branch `baseline-setup`: `.gitignore`, `MEMORY.md`, `research/` import. No files currently claimed. Before concurrent edits, record owner and files here, then release when finished. Do not duplicate paid experiments.
+Claude Code (user's session) edited on branch `baseline-setup`: `.gitignore`, `MEMORY.md`, `research/` import. Second Claude Code session (this one) rebased the `a1/` harness work onto `baseline-setup` and pushed; it currently claims `a1/*`, root `README.md`, `MEMORY.md`. Before concurrent edits, record owner and files here, then release when finished. Do not duplicate paid experiments.
 
 ## Next action
 
-1. Treat dev16-baseline-001 (62.5%) as the working baseline reference on the dev subset; the full 400 run is deferred until needed for submission.
-2. Test one change at a time on dev16, each in a fresh `submissions/<name>/` dir: (a) lower reasoning effort renderer (`qwen3_8_low_reasoning`/`medium`) to cut tokens and truncation; (b) code-executing agent per README plan (model writes openpyxl script, runs in Docker) to fix enumeration/row-shift/date-typing failures. Compare against dev16-baseline-001 by pass_rate, tokens and elapsed.
-2. Run BASELINE.md step 3 smoke test (`--ids 13-1,51-12`) from `research/`, then step 4 full 400 into a fresh `submissions/baseline-full-001/` directory, capturing stdout/stderr with `2>&1 | tee`.
-3. Record model, parameters, elapsed time, token usage, errors and the evaluator summary here.
+1. Record the `dev16-a1-002` confirmation result here when it finishes.
+2. Team decision: merge PR #1, then launch the full-400 run with the `a1/` harness TONIGHT
+   (fresh `experiments/full-400-001/`, concurrency 6, `2>&1 | tee` for run.log). Deferred until
+   that decision — do not launch from a fresh session without it.
+3. Apply the PR-review doc fixes (DeepSeek quick-start warning, BASELINE.md --max-tokens and
+   env-var interpolation, .env location note).
+4. After the full run: evaluate with `--all`, fill SUBMISSION.md (write-up, model id, scores),
+   verify the Docker image against SUBMISSION.md's judge contract.

@@ -1,42 +1,61 @@
-# A1 — SpreadsheetBench harness
+# A1 — SpreadsheetBench Harness
 
-Team A1's entry for the Ylookup x Encode hackathon research track. A code-executing
-agent around `qwen/qwen3.8-27b` (temperature 0): the model writes a Python script that
-opens the real workbook, computes the result, and writes plain values into the graded
-answer region; the script runs in the container, failures feed back for repair, and a
-reviewer call checks the written region against the instruction before accepting.
-A direct JSON-answer fallback covers tasks where the code path fails.
+Team A1's entry for the **Ylookup × Encode AI Hackathon** (research track): make a small
+model genuinely good at real spreadsheet work. The benchmark is SpreadsheetBench
+Verified — 400 tasks scraped from Excel forums. Workbook in, workbook out, graded
+cell-for-cell against a golden workbook after recalculation.
+
+**Status:** harness implemented and measured on the dev16 subset — 14/16 pass
+(cell accuracy 0.9865) vs 10/16 for the unchanged one-shot baseline, with both remaining
+failures fixed and confirmed individually afterwards. Full-400 run not yet launched
+(team decision pending). Project docs: [PROJECT.md](PROJECT.md), [BASELINE.md](BASELINE.md),
+[MEMORY.md](MEMORY.md); shared development instructions in [AGENTS.md](AGENTS.md)
+([CLAUDE.md](CLAUDE.md) for Claude Code).
+
+## Approach
+
+A code-executing agent around the fixed competition model, Qwen3.8-27B (temperature 0):
+instead of answering from a truncated text dump of the sheet, the model writes a Python
+script that opens the actual workbook, computes the result, and writes plain values into
+the graded answer region — wrapped in an execute → repair loop (mechanical hygiene checks
+plus a before/after self-verification pass) and a direct-answer fallback when the code
+path produces nothing. Fine-tuned checkpoints of the same model run through Tinker
+(Thinking Machines Lab).
+
+## Layout
+
+```
+a1/                 harness source
+  run.py            entrypoint: reads /data, writes /out (judge contract)
+  harness.py        per-task pipeline: code agent, repair, verify, fallback
+  serialize.py      answer-region-aware workbook serialization
+  coderun.py        sandboxed execution of model-written scripts
+  llm.py            chat-completions client for the team's model endpoint
+  tinker_llm.py     Tinker sampling backend (primary model access)
+  sbio.py           dataset + answer-range plumbing
+experiments/        dev-set runs and results (dev16 comparisons, fix checks)
+research/           official starter, imported unchanged (see research/UPSTREAM.md)
+Dockerfile          the container judges run: /data (ro) -> /out
+SUBMISSION.md       method write-up, models, scores
+.env.example        environment variables the pipeline needs
+```
 
 ## Run
+
+```sh
+uv sync --extra tinker
+uv run python -m a1.run --backend tinker --dataset-dir <dataset> --out-dir <out> [--ids 13-1,51-12]
+```
+
+Or via Docker (the judge contract):
 
 ```sh
 docker build -t a1 .
 docker run --rm --env-file .env -v <dataset dir>:/data:ro -v <empty dir>:/out a1
 ```
 
-The dataset dir must hold `dataset.json` and `spreadsheet/<id>/` folders as in
-`spreadsheetbench_verified_400`. Results land in `/out`: `predictions.jsonl`,
-`outputs/`, `traces/`, `run.log`.
-
-Local, without Docker (model-written code then runs on your machine):
-
-```sh
-uv sync
-uv run python -m a1.run --dataset-dir <dataset> --out-dir <out> --ids 13-1,51-12
-```
-
-Credentials come from the environment or a repo-root `.env` — see `.env.example`:
-`A1_API_BASE` + `A1_API_KEY` for the team's model endpoint (GCP), `TINKER_API_KEY`
-for fine-tuning and checkpoint sampling.
-
-## Layout
-
-- `a1/run.py` — entrypoint and output-contract plumbing
-- `a1/harness.py` — per-task pipeline: code agent, repair loop, verifier, direct fallback
-- `a1/serialize.py` — answer-region-aware workbook serialization (values + formula overlay)
-- `a1/coderun.py` — sandboxed execution of the model's script
-- `a1/llm.py` — chat-completions client for the team's model endpoint, temperature 0
-- `a1/tinker_llm.py` — Tinker sampling backend for fine-tuned checkpoints
-- `a1/sbio.py` — dataset/answer-range plumbing, adapted from the official starter
-
-Scores, method and experiments: see [SUBMISSION.md](SUBMISSION.md).
+Credentials: copy `.env.example` to `.env` **at the repo root** (read by `a1/`), and note
+the imported starter scripts read `research/.env` instead — keep both in sync if you use
+both. Tinker is the confirmed access route (`TINKER_API_KEY` + `TINKER_PROJECT_ID`);
+the model is fixed to Qwen3.8-27B and `a1/run.py` warns on anything else. Keys never
+live in the repo.
