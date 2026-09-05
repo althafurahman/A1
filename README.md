@@ -1,37 +1,11 @@
-# A1 — SpreadsheetBench Harness
+# A1 — SpreadsheetBench harness
 
-Team A1's entry for the **Ylookup × Encode AI Hackathon** (research track): make a small
-model genuinely good at real spreadsheet work. The benchmark is SpreadsheetBench
-Verified — 400 tasks scraped from Excel forums. Workbook in, workbook out, graded
-cell-for-cell against a golden workbook after recalculation.
-
-## Approach
-
-**Status:** project scaffold only; the architecture below is proposed, not yet implemented or measured. Start with [PROJECT.md](PROJECT.md), [BASELINE.md](BASELINE.md) and [MEMORY.md](MEMORY.md). Claude Code should read [CLAUDE.md](CLAUDE.md); shared development instructions are in [AGENTS.md](AGENTS.md).
-
-A code-executing agent around the fixed competition model, Qwen3.8-27B (temperature 0):
-instead of answering from a truncated text dump of the sheet, the model writes a Python
-script that opens the actual workbook, computes the result, and writes plain values into
-the graded answer region — wrapped in an execute → repair loop, a self-verification
-pass, and a direct-answer fallback. Fine-tuned checkpoints of the same model run through
-Tinker (Thinking Machines Lab). Details land here with the code.
-
-## Layout
-
-```
-a1/                 harness source
-  run.py            entrypoint: reads /data, writes /out (judge contract)
-  harness.py        per-task pipeline: code agent, repair, verify, fallback
-  serialize.py      answer-region-aware workbook serialization
-  coderun.py        sandboxed execution of model-written scripts
-  llm.py            chat-completions client for the team's model endpoint
-  tinker_llm.py     Tinker sampling backend for fine-tuned checkpoints
-  sbio.py           dataset + answer-range plumbing
-experiments/        dev-set ablation runs and results
-Dockerfile          the container judges run: /data (ro) -> /out
-SUBMISSION.md       method write-up, models, scores
-.env.example        environment variables the pipeline needs
-```
+Team A1's entry for the Ylookup x Encode hackathon research track. A code-executing
+agent around `qwen/qwen3.8-27b` (temperature 0): the model writes a Python script that
+opens the real workbook, computes the result, and writes plain values into the graded
+answer region; the script runs in the container, failures feed back for repair, and a
+reviewer call checks the written region against the instruction before accepting.
+A direct JSON-answer fallback covers tasks where the code path fails.
 
 ## Run
 
@@ -40,6 +14,26 @@ docker build -t a1 .
 docker run --rm --env-file .env -v <dataset dir>:/data:ro -v <empty dir>:/out a1
 ```
 
-The Docker command above is the intended run contract; a Dockerfile has not been implemented yet.
+The dataset dir must hold `dataset.json` and `spreadsheet/<id>/` folders as in
+`spreadsheetbench_verified_400`. Results land in `/out`: `predictions.jsonl`,
+`outputs/`, `traces/`, `run.log`.
 
-Copy `.env.example` to `.env` and configure only the confirmed team access route. Tinker supports baseline sampling as well as optional fine-tuning. A GCP-hosted model endpoint is not confirmed or required by the supplied instructions. Obtain the exact allowed Qwen3.8-27B API identifier before any model call. Keys never live in the repo.
+Local, without Docker (model-written code then runs on your machine):
+
+```sh
+uv sync
+uv run python -m a1.run --dataset-dir <dataset> --out-dir <out> --ids 13-1,51-12
+```
+
+`OPENROUTER_API_KEY` comes from the environment or a repo-root `.env`.
+
+## Layout
+
+- `a1/run.py` — entrypoint and output-contract plumbing
+- `a1/harness.py` — per-task pipeline: code agent, repair loop, verifier, direct fallback
+- `a1/serialize.py` — answer-region-aware workbook serialization (values + formula overlay)
+- `a1/coderun.py` — sandboxed execution of the model's script
+- `a1/llm.py` — OpenRouter client, fixed model, temperature 0
+- `a1/sbio.py` — dataset/answer-range plumbing, adapted from the official starter
+
+Scores, method and experiments: see [SUBMISSION.md](SUBMISSION.md).

@@ -1,0 +1,14 @@
+[project]
+name = "a1"
+version = "0.1.0"
+description = "Team A1 — SpreadsheetBench harness for the Ylookup x Encode hackathon research track"
+requires-python = ">=3.12"
+dependencies = [
+    "openpyxl>=3.1",
+    "pandas>=2.2",
+    "numpy>=2.0",
+    "httpx>=0.27",
+]
+
+[tool.uv]
+package = false

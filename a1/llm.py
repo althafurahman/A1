@@ -1,0 +1,66 @@
+"""OpenRouter chat client. Fixed model, temperature 0, retries, usage extraction."""
+
+import asyncio
+import os
+import time
+
+import httpx
+
+MODEL = "qwen/qwen3.8-27b"
+API_URL = "https://openrouter.ai/api/v1/chat/completions"
+MAX_RETRIES = 4
+TRACE_PROMPT_CAP = 20_000  # SUBMISSION.md allows truncating workbook serialisations in traces
+
+
+class LLMError(Exception):
+    pass
+
+
+class Client:
+    def __init__(self, model: str = MODEL, timeout: float = 420.0):
+        key = os.environ.get("OPENROUTER_API_KEY")
+        if not key:
+            raise LLMError("OPENROUTER_API_KEY is not set")
+        self.model = model
+        self._http = httpx.AsyncClient(
+            timeout=timeout,
+            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+        )
+
+    async def close(self):
+        await self._http.aclose()
+
+    async def complete(self, system: str, user: str, max_tokens: int = 16_000) -> dict:
+        """One call. Returns a trace record with text/tokens/latency; raises LLMError after retries."""
+        payload = {
+            "model": self.model,
+            "temperature": 0,
+            "max_tokens": max_tokens,
+            "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
+        }
+        started = time.time()
+        last_err = None
+        for attempt in range(MAX_RETRIES):
+            try:
+                r = await self._http.post(API_URL, json=payload)
+                if r.status_code in (429, 500, 502, 503, 529):
+                    raise LLMError(f"HTTP {r.status_code}: {r.text[:200]}")
+                r.raise_for_status()
+                data = r.json()
+                if "error" in data:
+                    raise LLMError(str(data["error"])[:300])
+                choice = data["choices"][0]
+                usage = data.get("usage") or {}
+                return {
+                    "model": self.model,
+                    "prompt": (system + "\n\n" + user)[:TRACE_PROMPT_CAP],
+                    "response": choice["message"]["content"],
+                    "input_tokens": usage.get("prompt_tokens"),
+                    "output_tokens": usage.get("completion_tokens"),
+                    "latency_ms": int((time.time() - started) * 1000),
+                    "error": None,
+                }
+            except (httpx.HTTPError, LLMError, KeyError) as e:
+                last_err = e
+                await asyncio.sleep(2 ** attempt * 2)
+        raise LLMError(f"gave up after {MAX_RETRIES} attempts: {last_err}")
