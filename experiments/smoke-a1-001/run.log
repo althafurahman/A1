@@ -1,0 +1,4 @@
+A1 backend=tinker model=Qwen/Qwen3.8-27B strategy=full tasks=2 concurrency=2
+51-12    ok
+13-1     ok
+finished: 2/2 predictions written

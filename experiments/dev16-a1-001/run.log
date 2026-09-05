@@ -1,0 +1,18 @@
+A1 backend=tinker model=Qwen/Qwen3.8-27B strategy=full tasks=16 concurrency=6
+79-7     ok
+472-15   ok
+203-15   ok
+263-1    ok
+48588    ok
+408-39   ok
+230-16   ok
+156-14   ok
+41265    ok
+36764    ok
+55049    ok
+41348    ok
+183-8    ok
+33722    ok
+55976    ok
+57232    ok
+finished: 16/16 predictions written
