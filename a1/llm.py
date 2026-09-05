@@ -41,7 +41,7 @@ class Client:
     async def close(self):
         await self._http.aclose()
 
-    async def complete(self, system: str, user: str, max_tokens: int = 16_000) -> dict:
+    async def complete(self, system: str, user: str, max_tokens: int = 24_576) -> dict:
         """One call. Returns a trace record with text/tokens/latency; raises LLMError after retries."""
         payload = {
             "model": self.model,

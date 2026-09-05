@@ -72,20 +72,28 @@ def answer_cells(task, wb=None):
 
 
 def read_answer_region(path, task, max_cells=600):
-    """Values currently in the answer region of a workbook, as printable lines."""
+    """Values currently in the answer region of a workbook, as printable lines.
+
+    Empty cells are called out explicitly so a reviewer can judge whether they
+    should be empty — a region that is only mostly filled is a classic near-miss.
+    """
     wb = openpyxl.load_workbook(path)  # not data_only: shows formulas the model wrongly wrote
-    lines, n = [], 0
+    lines, empty = [], []
     for sheet, coord in answer_cells(task, wb):
         ws = wb[sheet] if sheet and sheet in wb.sheetnames else wb.active
         v = ws[coord].value
-        if v is not None:
+        if v is None:
+            empty.append(f"{ws.title}!{coord}")
+        else:
             lines.append(f"{ws.title}!{coord} = {v!r}")
-        n += 1
         if len(lines) >= max_cells:
             lines.append("... (truncated)")
             break
     if not lines:
-        lines.append(f"(all {n} cells in the answer region are empty)")
+        return f"(all {len(empty)} cells in the answer region are empty)"
+    if empty:
+        shown = ", ".join(empty[:15]) + ("..." if len(empty) > 15 else "")
+        lines.append(f"EMPTY cells in the region ({len(empty)}): {shown}")
     return "\n".join(lines)
 
 

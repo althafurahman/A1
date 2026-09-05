@@ -23,6 +23,7 @@ VALUE_RULES = """Grading rules for the answer cells (only these cells are compar
 - Booleans must be real booleans (True/False), not 1/0 and not "TRUE".
 - A cell that should be empty must be empty (None). Empty string equals empty.
 - Text must match exactly (case, spacing, punctuation), except text that parses as a number is compared numerically.
+- Never write leading or trailing whitespace in a text value; strip() strings you assemble or copy.
 - Do not change the sheet names of the workbook."""
 
 CODE_SYSTEM = """You are an expert spreadsheet engineer. You receive a serialized Excel workbook and a user instruction from an Excel forum. Instead of answering in text, you write ONE Python script that computes the result from the real workbook and writes it into the answer region.
@@ -44,6 +45,7 @@ Rules:
 - The instruction may ask for a formula, VBA or a manual technique. Ignore the requested mechanism: produce the final VALUES that would result in the answer region.
 - Compute from the actual data. Never hardcode results you read off the serialization for large ranges; loop over the real cells.
 - Only the answer region is graded; everything else in the workbook is ignored. But do not delete or rename sheets.
+- If the answer sheet does not exist in the workbook, create it with exactly that name and write there.
 - Print short diagnostics (row counts, a few computed values) so failures can be debugged.
 - Be deterministic. End by saving OUT.
 
@@ -59,7 +61,7 @@ stdout:
 
 VERIFY_SYSTEM = """You are a meticulous spreadsheet QA reviewer. You get a user instruction, workbook context, and the values a candidate solution wrote into the graded answer region. Decide whether the values plausibly satisfy the instruction.
 
-Check: correct interpretation of the instruction, sane magnitudes, right data types (dates as dates, numbers as numbers), no leftover formula strings, region actually filled where it should be, empty where it should be empty.
+Check: correct interpretation of the instruction, sane magnitudes, right data types (dates as dates, numbers as numbers), no leftover formula strings, region actually filled where it should be, empty where it should be empty. If the dump lists EMPTY cells, decide whether the instruction really implies those exact cells stay empty — partially filled regions are the most common near-miss.
 
 Reply with JSON only: {"pass": true} or {"pass": false, "issue": "<one concrete sentence on what is wrong and how to fix it>"}"""
 
@@ -96,20 +98,34 @@ def write_direct_answer(task, cells: list[dict], out_path: Path):
     shutil.copy(task["init_xlsx"], out_path)
     wb = openpyxl.load_workbook(out_path)
     for sheet, coord in answer_cells(task, wb):
+        if sheet and sheet not in wb.sheetnames:
+            wb.create_sheet(sheet)  # grading reads this sheet by name; never write elsewhere
         ws = wb[sheet] if sheet and sheet in wb.sheetnames else wb.active
         if coord in values:
             ws[coord] = values[coord]
     wb.save(out_path)
 
 
-def has_formula_strings(out_path: Path, task) -> bool:
+def hygiene_issues(out_path: Path, task) -> str | None:
+    """Mechanical checks on the written answer region: formula strings, stray whitespace."""
     wb = openpyxl.load_workbook(out_path)
+    formulas, padded = [], []
     for sheet, coord in answer_cells(task, wb):
         ws = wb[sheet] if sheet and sheet in wb.sheetnames else wb.active
         v = ws[coord].value
-        if isinstance(v, str) and v.startswith("="):
-            return True
-    return False
+        if isinstance(v, str):
+            if v.startswith("="):
+                formulas.append(f"{ws.title}!{coord}")
+            elif v != v.strip() and v.strip():
+                padded.append(f"{ws.title}!{coord}")
+    problems = []
+    if formulas:
+        problems.append(f"You wrote formula STRINGS into answer cells ({', '.join(formulas[:5])}...). "
+                        "Write computed plain values instead.")
+    if padded:
+        problems.append(f"Text values with leading/trailing whitespace in {', '.join(padded[:8])}"
+                        f"{'...' if len(padded) > 8 else ''}. Strip whitespace; grading compares text exactly.")
+    return " ".join(problems) or None
 
 
 class TaskRunner:
@@ -175,25 +191,31 @@ class TaskRunner:
         except LLMError as e:
             return f"error: {clean_status(e)}"
         code = extract_code(reply)
+        produced_any = False
         for attempt in range(MAX_REPAIRS + 1):
             if code is None:
+                if produced_any:
+                    return "ok"  # keep the last produced workbook rather than falling back
                 return "error: no code block in reply"
             result = run_code(code, self.task["init_xlsx"], str(self.out_xlsx))
             self._trace_tool("python", code, f"ok={result['ok']}\nstdout:\n{result['stdout']}\nstderr:\n{result['stderr']}")
-            if result["ok"] and has_formula_strings(self.out_xlsx, self.task):
-                result = {"ok": False, "stdout": result["stdout"],
-                          "stderr": "You wrote formula STRINGS into answer cells. Write computed plain values instead."}
             if result["ok"]:
-                verified = await self._verify(task_user)
-                if verified is True or attempt == MAX_REPAIRS:
-                    return "ok"
-                result = {"ok": False, "stdout": "", "stderr": f"Output was produced, but review found a problem: {verified}"}
+                produced_any = True
+                issue = hygiene_issues(self.out_xlsx, self.task)
+                if issue is None:
+                    verified = await self._verify(task_user)
+                    if verified is True:
+                        return "ok"
+                    issue = f"Output was produced, but review found a problem: {verified}"
+                result = {"ok": False, "stdout": result["stdout"], "stderr": issue}
             if attempt == MAX_REPAIRS:
+                if produced_any:
+                    return "ok"  # advisory issues at this point; a produced output beats the fallback
                 return f"error: code failed: {clean_status(result['stderr'], 150)}"
             try:
                 reply = await self._call(system, task_user + "\n\n" + REPAIR_USER.format(**result), "repair")
             except LLMError as e:
-                return f"error: {clean_status(e)}"
+                return "ok" if produced_any else f"error: {clean_status(e)}"
             code = extract_code(reply)
         return "error: unreachable"
 

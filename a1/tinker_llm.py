@@ -30,7 +30,9 @@ class TinkerClient:
     async def close(self):
         pass
 
-    async def complete(self, system: str, user: str, max_tokens: int = 16_000) -> dict:
+    # Qwen3.8-27B's recommended renderer thinks at length: 8192 truncates mid-reasoning,
+    # 24576 was validated on the baseline smoke tests. Script-style replies stay well under it.
+    async def complete(self, system: str, user: str, max_tokens: int = 24_576) -> dict:
         started = time.time()
         messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
         model_input = self._renderer.build_generation_prompt(messages)
