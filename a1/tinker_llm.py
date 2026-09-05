@@ -1,6 +1,6 @@
 """Tinker sampling backend: same .complete() contract as llm.Client.
 
-Used for two things: harness development before the OpenRouter key exists, and running
+Used for two things: harness development before the endpoint credentials exist, and running
 the pipeline against a fine-tuned sampler checkpoint (tinker://.../sampler_weights/...).
 Requires TINKER_API_KEY. Install: uv sync --extra tinker
 """

@@ -13,8 +13,8 @@
 
 ## Models
 
-- `qwen/qwen3.8-27b` via OpenRouter, temperature 0, for every call in the pipeline
-  (code generation, repair, verification, direct fallback). No fine-tune.
+- `qwen/qwen3.8-27b`, temperature 0, for every call in the pipeline
+  (code generation, repair, verification, direct fallback). Endpoint named before submission.
 
 ## Scores on the 400
 

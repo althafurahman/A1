@@ -40,7 +40,8 @@ def parse_args():
                    help="full = code agent + verify + direct fallback; others for ablations")
     p.add_argument("--model", default=os.environ.get("MODEL", MODEL),
                    help="override for ablations only; the submission model is fixed")
-    p.add_argument("--backend", choices=["openrouter", "tinker"], default="openrouter")
+    p.add_argument("--backend", choices=["api", "tinker"], default="api",
+                   help="api = the team's chat-completions endpoint (A1_API_BASE); tinker = Tinker sampling")
     p.add_argument("--base-model", default="Qwen/Qwen3.8-27B", help="tinker backend: tokenizer/renderer base")
     p.add_argument("--model-path", help="tinker backend: tinker://... sampler checkpoint")
     return p.parse_args()

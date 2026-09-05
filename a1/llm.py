@@ -1,8 +1,9 @@
-"""Chat client for any OpenAI-compatible endpoint. Temperature 0, retries, usage extraction.
+"""Chat-completions client for the team's model endpoint. Temperature 0, retries, usage.
 
-Defaults to OpenRouter. Point it elsewhere (e.g. a Vertex AI MaaS endpoint on the team's
-GCP project) with A1_API_BASE and A1_API_KEY; the payload and response shape are the
-standard chat-completions contract either way.
+The team's model access is the GCP credits (e.g. a Vertex AI endpoint serving
+qwen3.8-27b on the team project). Point A1_API_BASE at the endpoint's base URL and
+A1_API_KEY at its bearer token; any provider speaking the standard chat-completions
+schema works unchanged.
 """
 
 import asyncio
@@ -12,7 +13,6 @@ import time
 import httpx
 
 MODEL = "qwen/qwen3.8-27b"
-DEFAULT_API_BASE = "https://openrouter.ai/api/v1"
 MAX_RETRIES = 4
 TRACE_PROMPT_CAP = 20_000  # SUBMISSION.md allows truncating workbook serialisations in traces
 
@@ -27,10 +27,10 @@ class FatalLLMError(LLMError):
 
 class Client:
     def __init__(self, model: str = MODEL, timeout: float = 420.0):
-        key = os.environ.get("A1_API_KEY") or os.environ.get("OPENROUTER_API_KEY")
-        if not key:
-            raise LLMError("no API key: set A1_API_KEY (custom endpoint) or OPENROUTER_API_KEY")
-        base = (os.environ.get("A1_API_BASE") or DEFAULT_API_BASE).rstrip("/")
+        key = os.environ.get("A1_API_KEY")
+        base = os.environ.get("A1_API_BASE", "").rstrip("/")
+        if not key or not base:
+            raise LLMError("set A1_API_BASE and A1_API_KEY to the team's model endpoint (see .env.example)")
         self.url = f"{base}/chat/completions"
         self.model = model
         self._http = httpx.AsyncClient(

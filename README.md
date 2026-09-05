@@ -25,9 +25,9 @@ uv sync
 uv run python -m a1.run --dataset-dir <dataset> --out-dir <out> --ids 13-1,51-12
 ```
 
-Credentials come from the environment or a repo-root `.env` — see `.env.example`.
-The client speaks the standard chat-completions contract: it defaults to OpenRouter and
-can be pointed at any OpenAI-compatible endpoint with `A1_API_BASE` + `A1_API_KEY`.
+Credentials come from the environment or a repo-root `.env` — see `.env.example`:
+`A1_API_BASE` + `A1_API_KEY` for the team's model endpoint (GCP), `TINKER_API_KEY`
+for fine-tuning and checkpoint sampling.
 
 ## Layout
 
@@ -35,7 +35,7 @@ can be pointed at any OpenAI-compatible endpoint with `A1_API_BASE` + `A1_API_KE
 - `a1/harness.py` — per-task pipeline: code agent, repair loop, verifier, direct fallback
 - `a1/serialize.py` — answer-region-aware workbook serialization (values + formula overlay)
 - `a1/coderun.py` — sandboxed execution of the model's script
-- `a1/llm.py` — model client (any OpenAI-compatible endpoint), temperature 0
+- `a1/llm.py` — chat-completions client for the team's model endpoint, temperature 0
 - `a1/tinker_llm.py` — Tinker sampling backend for fine-tuned checkpoints
 - `a1/sbio.py` — dataset/answer-range plumbing, adapted from the official starter
 
