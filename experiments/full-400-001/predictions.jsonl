@@ -1,0 +1,28 @@
+{"id": "41-47", "output": "outputs/41-47.xlsx", "status": "error: error: tinker sampling failed after 3 attempts: Error code: 400 - {'detail': \"Prompt length plus max_tokens exceeds the model's context window: 67513 prompt tokens + 24576 max_tokens > 65; direct fallback failed: tinker sampling failed after 3"}
+{"id": "279-23", "output": "outputs/279-23.xlsx", "status": "ok"}
+{"id": "267-21", "output": "outputs/267-21.xlsx", "status": "ok"}
+{"id": "60-7", "output": "outputs/60-7.xlsx", "status": "ok"}
+{"id": "280-17", "output": "outputs/280-17.xlsx", "status": "ok"}
+{"id": "28-7", "output": "outputs/28-7.xlsx", "status": "ok"}
+{"id": "24-23", "output": "outputs/24-23.xlsx", "status": "ok"}
+{"id": "269-43", "output": "outputs/269-43.xlsx", "status": "ok"}
+{"id": "341-40", "output": "outputs/341-40.xlsx", "status": "error: error: no code block in reply; direct fallback failed: no JSON in reply: \"We need answer user's request: compute final values answer range A1:Q701 after instruction applied. Need output JSON onl\""}
+{"id": "290-1", "output": "outputs/290-1.xlsx", "status": "ok"}
+{"id": "384-4", "output": "outputs/384-4.xlsx", "status": "ok"}
+{"id": "283-32", "output": "outputs/283-32.xlsx", "status": "ok"}
+{"id": "297-42", "output": "outputs/297-42.xlsx", "status": "ok"}
+{"id": "455-35", "output": "outputs/455-35.xlsx", "status": "error: error: tinker sampling failed after 3 attempts: Error code: 400 - {'detail': \"Prompt length plus max_tokens exceeds the model's context window: 104396 prompt tokens + 24576 max_tokens > 6; direct fallback failed: tinker sampling failed after 3"}
+{"id": "262-17", "output": "outputs/262-17.xlsx", "status": "ok"}
+{"id": "51-12", "output": "outputs/51-12.xlsx", "status": "ok"}
+{"id": "17-35", "output": "outputs/17-35.xlsx", "status": "ok"}
+{"id": "472-15", "output": "outputs/472-15.xlsx", "status": "ok"}
+{"id": "333-29", "output": "outputs/333-29.xlsx", "status": "ok"}
+{"id": "469-9", "output": "outputs/469-9.xlsx", "status": "ok"}
+{"id": "269-44", "output": "outputs/269-44.xlsx", "status": "ok"}
+{"id": "79-7", "output": "outputs/79-7.xlsx", "status": "ok"}
+{"id": "493-18", "output": "outputs/493-18.xlsx", "status": "ok"}
+{"id": "547-18", "output": "outputs/547-18.xlsx", "status": "ok"}
+{"id": "304-35", "output": "outputs/304-35.xlsx", "status": "ok"}
+{"id": "263-1", "output": "outputs/263-1.xlsx", "status": "ok"}
+{"id": "80-42", "output": "outputs/80-42.xlsx", "status": "error: error: no code block in reply; direct fallback failed: no JSON in reply: \"We need answer user's request? Actually system says spreadsheet expert, given serialized workbook and instruction, compu\""}
+{"id": "82-30", "output": "outputs/82-30.xlsx", "status": "ok"}

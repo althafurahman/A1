@@ -69,7 +69,7 @@ def _answer_rows_by_sheet(task, wb):
     return out
 
 
-def serialize_workbook(wb_vals, wb_form, task):
+def serialize_workbook(wb_vals, wb_form, task, char_budget=CHAR_BUDGET):
     """wb_vals: data_only load. wb_form: normal load (formulas visible)."""
     answer_map = _answer_rows_by_sheet(task, wb_vals)
     parts = []
@@ -108,6 +108,6 @@ def serialize_workbook(wb_vals, wb_form, task):
             lines += formulas
         parts.append("\n".join(lines))
     text = "\n\n".join(parts)
-    if len(text) > CHAR_BUDGET:
-        text = text[:CHAR_BUDGET] + "\n... (serialization truncated at budget)"
+    if len(text) > char_budget:
+        text = text[:char_budget] + "\n... (serialization truncated at budget; read the real workbook for full data)"
     return text

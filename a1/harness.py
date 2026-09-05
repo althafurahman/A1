@@ -165,19 +165,28 @@ class TaskRunner:
                                "latency_ms": None, "error": str(e)[:500], "phase": phase})
             raise
 
+    SERIALIZATION_BUDGETS = (120_000, 45_000, 16_000)  # chars; shrink when the prompt overflows the context
+
+    @staticmethod
+    def _prompt_overflow(status: str | None) -> bool:
+        return bool(status) and ("prompt too long" in status or "context window" in status)
+
     async def solve(self) -> str:
         task = self.task
         started = time.time()
         wb_vals = openpyxl.load_workbook(task["init_xlsx"], data_only=True)
         wb_form = openpyxl.load_workbook(task["init_xlsx"])
-        serialization = serialize_workbook(wb_vals, wb_form, task)
-        task_user = build_task_user(task, serialization)
 
         status = None
-        if self.strategy in ("full", "code"):
-            status = await self._solve_code(task_user)
-        if status != "ok" and self.strategy in ("full", "direct"):
-            status = await self._solve_direct(task_user, note=status)
+        for budget in self.SERIALIZATION_BUDGETS:
+            serialization = serialize_workbook(wb_vals, wb_form, task, char_budget=budget)
+            task_user = build_task_user(task, serialization)
+            if self.strategy in ("full", "code"):
+                status = await self._solve_code(task_user)
+            if status != "ok" and self.strategy in ("full", "direct") and not self._prompt_overflow(status):
+                status = await self._solve_direct(task_user, note=status)
+            if not self._prompt_overflow(status):
+                break
         if status != "ok":
             shutil.copy(task["init_xlsx"], self.out_xlsx)
             status = status or "error: no strategy produced output"
@@ -194,11 +203,12 @@ class TaskRunner:
         produced_any = False
         for attempt in range(MAX_REPAIRS + 1):
             if code is None:
-                if produced_any:
-                    return "ok"  # keep the last produced workbook rather than falling back
-                return "error: no code block in reply"
-            result = run_code(code, self.task["init_xlsx"], str(self.out_xlsx))
-            self._trace_tool("python", code, f"ok={result['ok']}\nstdout:\n{result['stdout']}\nstderr:\n{result['stderr']}")
+                result = {"ok": False, "stdout": "",
+                          "stderr": "Your reply contained no ```python code block. "
+                                    "Reply with the complete script in exactly one ```python block."}
+            else:
+                result = run_code(code, self.task["init_xlsx"], str(self.out_xlsx))
+                self._trace_tool("python", code, f"ok={result['ok']}\nstdout:\n{result['stdout']}\nstderr:\n{result['stderr']}")
             if result["ok"]:
                 produced_any = True
                 issue = hygiene_issues(self.out_xlsx, self.task)

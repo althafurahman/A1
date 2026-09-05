@@ -1,0 +1,29 @@
+A1 backend=tinker model=Qwen/Qwen3.8-27B strategy=full tasks=400 concurrency=16
+41-47    error: error: tinker sampling failed after 3 attempts: Error code: 400 - {'detail': "Prompt length plus max_tokens exceeds the model's context window: 67513 prompt tokens + 24576 max_tokens > 65; direct fallback failed: tinker sampling failed after 3
+279-23   ok
+267-21   ok
+60-7     ok
+280-17   ok
+28-7     ok
+24-23    ok
+269-43   ok
+341-40   error: error: no code block in reply; direct fallback failed: no JSON in reply: "We need answer user's request: compute final values answer range A1:Q701 after instruction applied. Need output JSON onl"
+290-1    ok
+384-4    ok
+283-32   ok
+297-42   ok
+455-35   error: error: tinker sampling failed after 3 attempts: Error code: 400 - {'detail': "Prompt length plus max_tokens exceeds the model's context window: 104396 prompt tokens + 24576 max_tokens > 6; direct fallback failed: tinker sampling failed after 3
+262-17   ok
+51-12    ok
+17-35    ok
+472-15   ok
+333-29   ok
+469-9    ok
+269-44   ok
+79-7     ok
+493-18   ok
+547-18   ok
+304-35   ok
+263-1    ok
+80-42    error: error: no code block in reply; direct fallback failed: no JSON in reply: "We need answer user's request? Actually system says spreadsheet expert, given serialized workbook and instruction, compu"
+82-30    ok
