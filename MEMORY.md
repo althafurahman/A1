@@ -7,7 +7,7 @@ Updated: 2026-09-05 (evening, after dev16 batch). Record facts, not assumed prog
 - Two-person team: user owns product/architecture/data/AI/ML; partner is senior full-stack developer.
 - Registered for Research track. User also uses Claude Code for development.
 - Team repo https://github.com/althafurahman/A1 cloned into A1/. Parent workspace holds the briefing PDFs and is not a Git repository.
-- Work is on local branch `baseline-setup` (branched from `main` at a2f6ea9). Nothing pushed.
+- Work is on branch `baseline-setup` (from `main` at a2f6ea9), pushed to https://github.com/althafurahman/A1/tree/baseline-setup on 2026-09-05. `main` untouched; merging is a team decision.
 - Starter imported: `research/` copied byte-identical from https://github.com/ylookup/encode-hackathon commit 37d9016264762a25cae49e077cd0893055bd9093 (verified with diff -r; remote HEAD was still that commit on 2026-09-05). Root `.gitattributes` copied too. See `research/UPSTREAM.md`. The temporary review checkout in /tmp is not the team project.
 - Team `.gitignore` rule `data/` was changed to `/data/` so `research/data/download.py` is tracked; the downloaded dataset and tarball stay ignored.
 - Environment verified on user's Mac (Darwin 25.6, Apple Silicon Homebrew):
