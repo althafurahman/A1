@@ -67,8 +67,11 @@ JSON-answer fallback only if the code path produced no output at all. Backend: T
 - `experiments/fix-check-001/`: 156-14 PASS 156/156. 230-16 regressed to 2/12 via a differently
   sampled script (row shift; sampling varies at temp 0) — motivated the before/after verifier.
 - `experiments/fix-check-002/`: 230-16 PASS 12/12, first attempt, no repairs.
-- `experiments/dev16-a1-002/`: confirmation run of the final config on dev16 — IN PROGRESS,
-  result to be recorded here.
+- `experiments/dev16-a1-002/`: confirmation run of the final config on dev16 — pass_rate 0.9375
+  (15/16), cell_accuracy 0.971, cell-level 8/8, sheet-level 7/8. 32 calls, 248k output tokens,
+  ~$1.52. Sole failure 183-8 (5/20, region partially empty) — it passed in dev16-a1-001;
+  sampling variance at temperature 0, same wobble the baseline shows. Every dev16 task has now
+  passed with the final config in at least one run.
 - Credits spent by these runs: ~$3.50 total.
 - Cosmetic: tinker's session-futures poller logs "Task was destroyed but it is pending!" at exit;
   harmless, not yet silenced.
@@ -86,11 +89,10 @@ Claude Code (user's session) edited on branch `baseline-setup`: `.gitignore`, `M
 
 ## Next action
 
-1. Record the `dev16-a1-002` confirmation result here when it finishes.
-2. Team decision: merge PR #1, then launch the full-400 run with the `a1/` harness TONIGHT
+1. Team decision: merge PR #1, then launch the full-400 run with the `a1/` harness TONIGHT
    (fresh `experiments/full-400-001/`, concurrency 6, `2>&1 | tee` for run.log). Deferred until
    that decision — do not launch from a fresh session without it.
-3. Apply the PR-review doc fixes (DeepSeek quick-start warning, BASELINE.md --max-tokens and
+2. Apply the PR-review doc fixes (DeepSeek quick-start warning, BASELINE.md --max-tokens and
    env-var interpolation, .env location note).
-4. After the full run: evaluate with `--all`, fill SUBMISSION.md (write-up, model id, scores),
+3. After the full run: evaluate with `--all`, fill SUBMISSION.md (write-up, model id, scores),
    verify the Docker image against SUBMISSION.md's judge contract.
