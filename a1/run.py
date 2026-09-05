@@ -41,9 +41,18 @@ def parse_args():
     p.add_argument("--model", default=os.environ.get("MODEL", MODEL),
                    help="override for ablations only; the submission model is fixed")
     p.add_argument("--backend", choices=["openrouter", "tinker"], default="openrouter")
-    p.add_argument("--base-model", default="Qwen/Qwen3-8B", help="tinker backend: tokenizer/renderer base")
+    p.add_argument("--base-model", default="Qwen/Qwen3.8-27B", help="tinker backend: tokenizer/renderer base")
     p.add_argument("--model-path", help="tinker backend: tinker://... sampler checkpoint")
     return p.parse_args()
+
+
+ALLOWED_MODEL = "qwen3.8-27b"  # competition rule: this model only, every backend, fine-tunes included
+
+
+def check_model_allowed(name: str, out_dir: Path):
+    if ALLOWED_MODEL not in name.lower():
+        log(out_dir, f"WARNING: model '{name}' is not {ALLOWED_MODEL} — the competition allows only "
+                     f"Qwen3.8-27B (and Tinker fine-tunes of it). Use this run for plumbing tests only.")
 
 
 def prepare_out_dir(out_dir: Path):
@@ -79,8 +88,10 @@ async def main():
     if args.backend == "tinker":
         from .tinker_llm import TinkerClient
         client = TinkerClient(base_model=args.base_model, model_path=args.model_path)
+        check_model_allowed(args.base_model, out_dir)
     else:
         client = Client(model=args.model)
+        check_model_allowed(args.model, out_dir)
     log(out_dir, f"A1 backend={args.backend} model={client.model} strategy={args.strategy} "
                  f"tasks={len(tasks)} concurrency={args.concurrency}")
     semaphore = asyncio.Semaphore(args.concurrency)
