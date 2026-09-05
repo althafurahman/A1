@@ -17,11 +17,11 @@ Updated: 2026-09-05 (evening). Record facts, not assumed progress.
   - LibreOffice 26.8.0.3 installed via `brew install --cask libreoffice`; `soffice` on PATH. Recalculation verified: a formula written by openpyxl with no cached value came back as the correct number through `sb.recalculate()`.
   - Docker Desktop 29.1.2 installed; daemon started with `open -a Docker` and responds. It must be running for any future code-executing agent.
 - Model identifier CONFIRMED by user 2026-09-05: `Qwen/Qwen3.8-27B` (Tinker models page: about $1.86/M prefill, $5.60/M sample; tinker-cookbook renderer `qwen3_8_xhigh_reasoning`). Recorded in `research/.env` as A1_ALLOWED_MODEL_ID. No model has been called yet.
-- `research/.env` exists (git-ignored) but TINKER_API_KEY is still empty; smoke test blocked on it. No credits spent, no training, no scores produced.
+- TINKER_API_KEY is set in `research/.env` (git-ignored). First smoke-test attempt (2026-09-05) authenticated but failed before any sampling with `400 This project is read-only and cannot be modified.` Console saved at `research/submissions/baseline-smoke-001/console.log` (key not printed). Cause per SDK source: with no TINKER_PROJECT_ID the session lands in the org's read-only Default project. Fix: set TINKER_PROJECT_ID (shared team project id from the Tinker console) in `research/.env`. The API has no project-listing call. No credits spent, no scores produced.
 
 ## Open questions
 
-1. User must paste the team Tinker key into `research/.env` as TINKER_API_KEY (never committed, never printed).
+1. User must put the shared team project id into `research/.env` as TINKER_PROJECT_ID (from Tinker console, project settings/URL).
 2. Permitted training-data sources. Claude Code/Codex are development tools only, not solver models.
 3. Judge runtime/resources/API limits; research video/live presentation expectations.
 4. GCP endpoint in old README is unconfirmed and not needed for the Tinker route.
@@ -40,6 +40,6 @@ Claude Code (user's session) edited on branch `baseline-setup`: `.gitignore`, `M
 
 ## Next action
 
-1. User puts TINKER_API_KEY in `research/.env`.
+1. User puts TINKER_PROJECT_ID in `research/.env`, then rerun the smoke test into a fresh dir `submissions/baseline-smoke-002/`.
 2. Run BASELINE.md step 3 smoke test (`--ids 13-1,51-12`) from `research/`, then step 4 full 400 into a fresh `submissions/baseline-full-001/` directory, capturing stdout/stderr with `2>&1 | tee`.
 3. Record model, parameters, elapsed time, token usage, errors and the evaluator summary here.
