@@ -16,12 +16,12 @@ Updated: 2026-09-05 (evening). Record facts, not assumed progress.
   - `uv run evaluate.py --oracle` → items 400, graded 400, pass_rate 1.0, cell_accuracy 1.0 (grader loads/compares correctly; says nothing about model ability).
   - LibreOffice 26.8.0.3 installed via `brew install --cask libreoffice`; `soffice` on PATH. Recalculation verified: a formula written by openpyxl with no cached value came back as the correct number through `sb.recalculate()`.
   - Docker Desktop 29.1.2 installed; daemon started with `open -a Docker` and responds. It must be running for any future code-executing agent.
-- Model identifier: Tinker's public models page (https://tinker-docs.thinkingmachines.ai/tinker/models/) lists `Qwen/Qwen3.8-27B` (about $1.86/M prefill, $5.60/M sample) and tinker-cookbook maps it to renderer `qwen3_8_xhigh_reasoning`. This matches the organiser's display name but the user has NOT yet confirmed it as the permitted identifier. No model has been called.
-- No TINKER_API_KEY configured (no `.env` in A1/ or research/). No credits spent, no training, no scores produced.
+- Model identifier CONFIRMED by user 2026-09-05: `Qwen/Qwen3.8-27B` (Tinker models page: about $1.86/M prefill, $5.60/M sample; tinker-cookbook renderer `qwen3_8_xhigh_reasoning`). Recorded in `research/.env` as A1_ALLOWED_MODEL_ID. No model has been called yet.
+- `research/.env` exists (git-ignored) but TINKER_API_KEY is still empty; smoke test blocked on it. No credits spent, no training, no scores produced.
 
 ## Open questions
 
-1. Confirm `Qwen/Qwen3.8-27B` is the exact permitted identifier (organiser or Tinker project). Then set A1_ALLOWED_MODEL_ID and TINKER_API_KEY in `research/.env` (never committed).
+1. User must paste the team Tinker key into `research/.env` as TINKER_API_KEY (never committed, never printed).
 2. Permitted training-data sources. Claude Code/Codex are development tools only, not solver models.
 3. Judge runtime/resources/API limits; research video/live presentation expectations.
 4. GCP endpoint in old README is unconfirmed and not needed for the Tinker route.
@@ -40,6 +40,6 @@ Claude Code (user's session) edited on branch `baseline-setup`: `.gitignore`, `M
 
 ## Next action
 
-1. User confirms model identifier and puts TINKER_API_KEY in `research/.env`.
+1. User puts TINKER_API_KEY in `research/.env`.
 2. Run BASELINE.md step 3 smoke test (`--ids 13-1,51-12`) from `research/`, then step 4 full 400 into a fresh `submissions/baseline-full-001/` directory, capturing stdout/stderr with `2>&1 | tee`.
 3. Record model, parameters, elapsed time, token usage, errors and the evaluator summary here.
