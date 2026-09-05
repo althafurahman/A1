@@ -35,10 +35,10 @@ The pipeline is an agent that executes model-written Python, so it runs in Docke
 
 ```sh
 docker build -t a1 .
-docker run --rm -e OPENROUTER_API_KEY -v <dataset dir>:/data:ro -v <empty dir>:/out a1
+docker run --rm --env-file .env -v <dataset dir>:/data:ro -v <empty dir>:/out a1
 ```
 
-Environment variables: `OPENROUTER_API_KEY` only.
+Environment variables: `A1_API_BASE`, `A1_API_KEY` (the team's model endpoint).
 
 ## Things to look at
 

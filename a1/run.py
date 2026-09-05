@@ -3,7 +3,7 @@
     python -m a1.run --dataset-dir /data --out-dir /out [--ids 13-1,51-12] [--concurrency 8] [--strategy full]
 
 Reads dataset.json + init workbooks from --dataset-dir, writes predictions.jsonl,
-outputs/, traces/ and run.log into --out-dir. Needs OPENROUTER_API_KEY.
+outputs/, traces/ and run.log into --out-dir. Needs A1_API_BASE and A1_API_KEY.
 """
 
 import argparse
