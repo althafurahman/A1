@@ -1,9 +1,16 @@
 .env
+.env.*
+!.env.example
 .venv/
 __pycache__/
 *.pyc
-data/
+/data/
 work/
 experiments/*/outputs/
 experiments/*/traces/
 .DS_Store
+
+# Final submission artifacts at repo root must remain trackable.
+# Downloaded upstream benchmark is local only.
+research/data/spreadsheetbench_verified_400/
+research/data/spreadsheetbench_verified_400.tar.gz
