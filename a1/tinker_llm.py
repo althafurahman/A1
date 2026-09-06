@@ -12,8 +12,16 @@ class LLMError(Exception):
     pass
 
 
+# The team's Tinker project. Not a secret (unusable without the API key); hardcoded as the
+# default per organiser instruction so judges run with only TINKER_API_KEY set, exactly as
+# we do. An explicit TINKER_PROJECT_ID env var still overrides it.
+TEAM_PROJECT_ID = "75fc4e61-fc39-485f-bed1-b79f2591ab24"
+
+
 class TinkerClient:
     def __init__(self, base_model: str, model_path: str | None = None):
+        import os
+        os.environ.setdefault("TINKER_PROJECT_ID", TEAM_PROJECT_ID)
         import tinker
         from tinker import types
         from tinker_cookbook import renderers
