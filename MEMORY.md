@@ -91,21 +91,45 @@ JSON-answer fallback only if the code path produced no output at all. Backend: T
 - `scripts/finalize.sh <run dir>`: scores with `--all`, copies predictions/outputs/traces/run.log/results.json to the repo root, greps traces for `golden`. `scripts/analyse_run.py <run dir>`: per-task calls/tokens/time and failure buckets.
 - `SUBMISSION.md` drafted for the Tinker pipeline (model id, env vars, trace truncation declared, evidence paths that exist). Still to fill: member handles and the scores block.
 
+## Full-400 run (night of 2026-09-05→06) — SUBMITTED ARTIFACTS
+
+Final score, shipped evaluator, `--all`, recalculation on: **pass_rate 0.870, cell_accuracy
+0.9729, cell-level 0.9091, sheet-level 0.784** (items 400, missing 0). Artifacts at repo root
+(`predictions.jsonl`, `outputs/`, `traces/`, `run.log`, `results.json`); merged set also kept
+in `experiments/submission-run/`.
+
+Chronology (disclosed in SUBMISSION.md): the run executed in four segments, merged last-wins
+on non-ok status; completed answers were never re-rolled.
+- `full-400-001` (00:39, concurrency 16): killed externally at 253/400. Observed 470→820 tok/s
+  aggregate — the assumed ~140 tok/s project cap was wrong; throughput scales with concurrency
+  and off-peak hours. 17 errors, mostly context-window overflows on giant workbooks.
+- Mid-run fix (committed a76d3a5, solver prompts unchanged for normal tasks): Tinker serves the
+  model with a 64k context, not 1M — clamp max_tokens to fit, shrink serialization on overflow
+  (120k→45k→16k chars), and route no-code-block replies through the repair nudge.
+- `full-400-002` (concurrency 10): killed at 10 tasks. Both kills took session-managed
+  background tasks only — machine never slept (60d uptime); cause is the session task sweep,
+  not OOM. Lesson: long runs must be nohup-detached from the session.
+- `full-400-003` (detached, concurrency 10): survived but slow (~250 tok/s); killed by us.
+- `full-400-004` (detached, concurrency 16): 144 tasks, zero kill, finished 03:50. The former
+  overflow errors passed with the fix (80-42, 209-30, 455-35, 41-47...).
+- Remaining failures: 2/400 with no answer (118-50, 42216 — model exhausts budget thinking
+  about 5000-row ranges before emitting code; init copies stand in, status honest).
+- Night's spend: ~7.6M output tokens, ≈$45. Total credits used to date ≈$55 of $1,000.
+
 ## ext40 generalisation set (user's session, branch `ext40-data`, 2026-09-06 03:00)
 
 - `experiments/ext40/`: 40 unseen tasks from the original SpreadsheetBench 912 (HF KAKA22/SpreadsheetBench, CC BY-SA 4.0; tarball sha256 9cf7228b...3399) that are not in the Verified 400. Built by `scripts/build_ext40.py` (seed 1): 512 candidates, dropped 3 empty instructions, 93 formatting/volatile, 28 unchanged answer range, 24 missing answer sheet, 13 >2000 cells, 1 unloadable; 353 eligible; 10 per bucket (cell/sheet x <=15/>15 cells). Renamed to the Verified layout; oracle 1.0 on 40/40.
-- Caveat: unverified leftover pool, so treat ext40 scores as relative between configs. Nobody has run a model on it yet; first run is the base harness after the teammate's full 400 finishes (`--dataset-dir experiments/ext40`, ~10-15 min, ~$2-3). Also the clean generalisation check for any fine-tune checkpoint.
+- Caveat: unverified leftover pool, so treat ext40 scores as relative between configs. First model run: base harness, `experiments/ext40-base-001` (see below when done). Also the clean generalisation check for any fine-tune checkpoint.
 
 ## Collaboration
 
-Claude Code (user's session) edited on branch `baseline-setup`: `.gitignore`, `MEMORY.md`, `research/` import. Second Claude Code session (this one) rebased the `a1/` harness work onto `baseline-setup` and pushed; it currently claims `a1/*`, root `README.md`, `MEMORY.md`. User's Claude Code session (2026-09-06 00:45) claims `SUBMISSION.md` (drafted for the Tinker route; scores block left for after the full run). Before concurrent edits, record owner and files here, then release when finished. Do not duplicate paid experiments.
+Claude Code (user's session) edited on branch `baseline-setup`: `.gitignore`, `MEMORY.md`, `research/` import. Second Claude Code session (this one) rebased the `a1/` harness work onto `baseline-setup` and pushed; it currently claims `a1/*`, root `README.md`, `MEMORY.md`. SUBMISSION.md claim settled: the 00:45 draft and the post-run scores were merged during the 04:30 rebase; no file currently claimed. Before concurrent edits, record owner and files here, then release when finished. Do not duplicate paid experiments.
 
-## Next action
+## Next action (Sunday morning)
 
-1. Team decision: merge PR #1, then launch the full-400 run with the `a1/` harness TONIGHT
-   (fresh `experiments/full-400-001/`, concurrency 6, `2>&1 | tee` for run.log). Deferred until
-   that decision — do not launch from a fresh session without it.
-2. Apply the PR-review doc fixes (DeepSeek quick-start warning, BASELINE.md --max-tokens and
-   env-var interpolation, .env location note).
-3. After the full run: evaluate with `--all`, fill SUBMISSION.md (write-up, model id, scores),
-   verify the Docker image against SUBMISSION.md's judge contract.
+1. SUBMISSION.md is complete (both handles, scores, write-up merged from both drafts).
+2. Team: merge PR #1 into main.
+3. Apply the PR-review doc fixes (DeepSeek quick-start warning, BASELINE.md --max-tokens and
+   env-var interpolation, .env location note) — 15 min, doc-only.
+4. Submit the repo URL through the organiser form BEFORE 12:00. The full-400 run, scores,
+   artifacts and SUBMISSION.md are DONE — do not re-run anything paid without a team decision.
