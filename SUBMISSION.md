@@ -82,3 +82,4 @@ Tinker project the key belongs to). The model id is fixed in `a1/run.py` and
 - `a1/harness.py` — the pipeline: prompts, hygiene checks, verifier, repair loop.
 - `a1/serialize.py` — answer-region-aware serialisation; why the one-shot baseline is blind on workbooks larger than 120 rows.
 - `MEMORY.md` — dated log of every run, failure category, cost and decision, including the full-400 chronology.
+- `experiments/ext40/` and `experiments/ext40-base-001/results.json` — generalisation check on 40 unseen tasks from the original SpreadsheetBench pool (not in the Verified 400; built by `scripts/build_ext40.py`, caveat in the README): 26/40 pass vs 87% on the 400; failure analysis in MEMORY.md.

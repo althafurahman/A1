@@ -119,7 +119,9 @@ on non-ok status; completed answers were never re-rolled.
 ## ext40 generalisation set (user's session, branch `ext40-data`, 2026-09-06 03:00)
 
 - `experiments/ext40/`: 40 unseen tasks from the original SpreadsheetBench 912 (HF KAKA22/SpreadsheetBench, CC BY-SA 4.0; tarball sha256 9cf7228b...3399) that are not in the Verified 400. Built by `scripts/build_ext40.py` (seed 1): 512 candidates, dropped 3 empty instructions, 93 formatting/volatile, 28 unchanged answer range, 24 missing answer sheet, 13 >2000 cells, 1 unloadable; 353 eligible; 10 per bucket (cell/sheet x <=15/>15 cells). Renamed to the Verified layout; oracle 1.0 on 40/40.
-- Caveat: unverified leftover pool, so treat ext40 scores as relative between configs. First model run: base harness, `experiments/ext40-base-001` (see below when done). Also the clean generalisation check for any fine-tune checkpoint.
+- Caveat: unverified leftover pool, so treat ext40 scores as relative between configs.
+- `experiments/ext40-base-001` (base harness from origin/main f61cc7a, concurrency 16, 04:43-05:09, ~$6.5, mean 25k output tokens/task): pass_rate 0.65 (26/40), cell_accuracy 0.863, cell-level 14/20, sheet-level 12/20. Versus 0.87 / 0.909 / 0.784 on the Verified 400: a ~20-point drop. Of the 14 fails: 2 are the whitespace-strip rule (321-9 leading space, 315-23 trailing spaces; 882/884 and 741/742 cells), 1 case ('Undefined' vs 'undefined'), 1 harness error (56637 no code block), ~2-3 look like golden quirks of the unverified pool (61-1 suffix applied three times, 98-21 rounding split), the rest genuine wrong values, mostly cell-level formula tasks (lookups, conditional sums). Honest read: ~12-15 points of real generalisation gap beyond self-inflicted rules and label noise.
+- Same self-inflicted pattern on the 400 (results.json at root): of 52 fails, 7 whitespace-strip, 4 text-date-converted, 18 empty header/label cells. Prompt fix for the teammate: values copied or moved from existing cells must be copied verbatim (type and whitespace); typing/strip rules apply only to newly computed values; drop the padded-whitespace repair check for copied values.
 
 ## Collaboration
 

@@ -1,0 +1,593 @@
+{
+  "summary": {
+    "items": 40,
+    "graded": 40,
+    "missing": 0,
+    "errors": 0,
+    "pass_rate": 0.65,
+    "cell_accuracy": 0.8626,
+    "pass_rate_cell_level": 0.7,
+    "pass_rate_sheet_level": 0.6
+  },
+  "items": [
+    {
+      "status": "graded",
+      "cells": 168,
+      "correct": 168,
+      "pass": true,
+      "mismatches": [],
+      "id": "49859",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 365,
+      "correct": 365,
+      "pass": true,
+      "mismatches": [],
+      "id": "42217",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 18,
+      "correct": 17,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "Sheet1!O2",
+          "expected": 20,
+          "actual": 10522
+        }
+      ],
+      "id": "59185",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 17,
+      "correct": 17,
+      "pass": true,
+      "mismatches": [],
+      "id": "37764",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 56,
+      "correct": 56,
+      "pass": true,
+      "mismatches": [],
+      "id": "49490",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 228,
+      "correct": 228,
+      "pass": true,
+      "mismatches": [],
+      "id": "55515",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 46,
+      "correct": 46,
+      "pass": true,
+      "mismatches": [],
+      "id": "15825",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 405,
+      "correct": 109,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "Sheet1!B3",
+          "expected": null,
+          "actual": "00:00:00"
+        },
+        {
+          "cell": "Sheet1!B9",
+          "expected": null,
+          "actual": "00:00:00"
+        },
+        {
+          "cell": "Sheet1!B10",
+          "expected": null,
+          "actual": "00:00:00"
+        },
+        {
+          "cell": "Sheet1!B21",
+          "expected": null,
+          "actual": "00:00:00"
+        },
+        {
+          "cell": "Sheet1!B22",
+          "expected": null,
+          "actual": "00:00:00"
+        }
+      ],
+      "id": "17049",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 22,
+      "correct": 22,
+      "pass": true,
+      "mismatches": [],
+      "id": "37228",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 146,
+      "correct": 58,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "Sheet1!B61",
+          "expected": "2nd Shift",
+          "actual": null
+        },
+        {
+          "cell": "Sheet1!B62",
+          "expected": "2nd Shift",
+          "actual": null
+        },
+        {
+          "cell": "Sheet1!B63",
+          "expected": "2nd Shift",
+          "actual": null
+        },
+        {
+          "cell": "Sheet1!B64",
+          "expected": "2nd Shift",
+          "actual": null
+        },
+        {
+          "cell": "Sheet1!B65",
+          "expected": "2nd Shift",
+          "actual": null
+        }
+      ],
+      "id": "56637",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 1,
+      "correct": 1,
+      "pass": true,
+      "mismatches": [],
+      "id": "15829",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 6,
+      "correct": 6,
+      "pass": true,
+      "mismatches": [],
+      "id": "48034",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 1,
+      "correct": 1,
+      "pass": true,
+      "mismatches": [],
+      "id": "55610",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 8,
+      "correct": 8,
+      "pass": true,
+      "mismatches": [],
+      "id": "53957",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 1,
+      "correct": 1,
+      "pass": true,
+      "mismatches": [],
+      "id": "40536",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 5,
+      "correct": 4,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "Sheet1!F6",
+          "expected": "Delete",
+          "actual": null
+        }
+      ],
+      "id": "52633",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 4,
+      "correct": 3,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "Sheet1!A5",
+          "expected": "Undefined",
+          "actual": "undefined"
+        }
+      ],
+      "id": "53174",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 10,
+      "correct": 10,
+      "pass": true,
+      "mismatches": [],
+      "id": "58667",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 1,
+      "correct": 0,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "Sheet1!C19",
+          "expected": 450,
+          "actual": 200
+        }
+      ],
+      "id": "55258",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 1,
+      "correct": 1,
+      "pass": true,
+      "mismatches": [],
+      "id": "33791",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 24,
+      "correct": 24,
+      "pass": true,
+      "mismatches": [],
+      "id": "430-39",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 36,
+      "correct": 36,
+      "pass": true,
+      "mismatches": [],
+      "id": "456-19",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 19,
+      "correct": 19,
+      "pass": true,
+      "mismatches": [],
+      "id": "434-7",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 75,
+      "correct": 18,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "Sheet1!A2",
+          "expected": "Site Name",
+          "actual": "*"
+        },
+        {
+          "cell": "Sheet1!B2",
+          "expected": "Worker1",
+          "actual": "*"
+        },
+        {
+          "cell": "Sheet1!C2",
+          "expected": "Worker2",
+          "actual": "*"
+        },
+        {
+          "cell": "Sheet1!D2",
+          "expected": "Worker3",
+          "actual": "*"
+        },
+        {
+          "cell": "Sheet1!E2",
+          "expected": "Worker4",
+          "actual": "*"
+        }
+      ],
+      "id": "225-40",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 884,
+      "correct": 882,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "Sheet1!C8",
+          "expected": " 2-FCS0011ACCX",
+          "actual": "2-FCS0011ACCX"
+        },
+        {
+          "cell": "Sheet1!C9",
+          "expected": " 2-FCS0011ACCX",
+          "actual": "2-FCS0011ACCX"
+        }
+      ],
+      "id": "321-9",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 742,
+      "correct": 741,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "Sheet1!C1",
+          "expected": "PART NO  ",
+          "actual": "PART NO"
+        }
+      ],
+      "id": "315-23",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 188,
+      "correct": 139,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "Sheet1!A7",
+          "expected": null,
+          "actual": "2021-01-01 00:00:00"
+        },
+        {
+          "cell": "Sheet1!B7",
+          "expected": "2021-01-01 00:00:00",
+          "actual": "MONTHLY"
+        },
+        {
+          "cell": "Sheet1!A8",
+          "expected": null,
+          "actual": "2021-02-01 00:00:00"
+        },
+        {
+          "cell": "Sheet1!B8",
+          "expected": "2021-01-22 00:00:00",
+          "actual": "MONTHLY"
+        },
+        {
+          "cell": "Sheet1!A9",
+          "expected": null,
+          "actual": "2021-03-01 00:00:00"
+        }
+      ],
+      "id": "247-14",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 143,
+      "correct": 142,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "Sheet1!E9",
+          "expected": null,
+          "actual": "Thai Febric"
+        }
+      ],
+      "id": "528-20",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 32,
+      "correct": 32,
+      "pass": true,
+      "mismatches": [],
+      "id": "374-9",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 20,
+      "correct": 20,
+      "pass": true,
+      "mismatches": [],
+      "id": "504-10",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 3,
+      "correct": 3,
+      "pass": true,
+      "mismatches": [],
+      "id": "94-28",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 15,
+      "correct": 15,
+      "pass": true,
+      "mismatches": [],
+      "id": "212-20",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 8,
+      "correct": 0,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "Sheet1!K2",
+          "expected": "PO 2312311 fuel Freddie Fuel",
+          "actual": "P O 2312311-Fuel"
+        },
+        {
+          "cell": "Sheet1!K3",
+          "expected": "PO 232726  Fuel",
+          "actual": "P O 232726-Fuel"
+        },
+        {
+          "cell": "Sheet1!K4",
+          "expected": "PO 232820 PTR-Fuel",
+          "actual": "P O 232820-Fuel"
+        },
+        {
+          "cell": "Sheet1!K5",
+          "expected": "PO 2329234 FILL UP MR Jackson-Fuel",
+          "actual": "P O 2329234-Fuel"
+        },
+        {
+          "cell": "Sheet1!K6",
+          "expected": "PO 2330110 James Parkins Fill Up Fuel",
+          "actual": "P O 2330110-Fuel"
+        }
+      ],
+      "id": "398-22",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 5,
+      "correct": 5,
+      "pass": true,
+      "mismatches": [],
+      "id": "225-4",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 5,
+      "correct": 5,
+      "pass": true,
+      "mismatches": [],
+      "id": "211-13",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 14,
+      "correct": 14,
+      "pass": true,
+      "mismatches": [],
+      "id": "84-38",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 14,
+      "correct": 6,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "BeforeVBA!D2",
+          "expected": "RPC0094-001-001-001",
+          "actual": "RPC0094-001"
+        },
+        {
+          "cell": "BeforeVBA!D3",
+          "expected": "RPC0094-001-001-001",
+          "actual": "RPC0094-001"
+        },
+        {
+          "cell": "BeforeVBA!D4",
+          "expected": "RPC0094-001-001-001",
+          "actual": "RPC0094-001"
+        },
+        {
+          "cell": "BeforeVBA!D5",
+          "expected": "RPC0097-001-001-001",
+          "actual": "RPC0097-001"
+        },
+        {
+          "cell": "BeforeVBA!D6",
+          "expected": "RPC0097-001-001-001",
+          "actual": "RPC0097-001"
+        }
+      ],
+      "id": "61-1",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 10,
+      "correct": 10,
+      "pass": true,
+      "mismatches": [],
+      "id": "458-24",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 14,
+      "correct": 11,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "INVOICE!I9",
+          "expected": 7253.280000000001,
+          "actual": 7253.3333333333
+        },
+        {
+          "cell": "INVOICE!I12",
+          "expected": 16266.6,
+          "actual": 16266.6666666667
+        },
+        {
+          "cell": "INVOICE!I15",
+          "expected": 28159.92,
+          "actual": 28160
+        }
+      ],
+      "id": "98-21",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 2,
+      "correct": 2,
+      "pass": true,
+      "mismatches": [],
+      "id": "76-43",
+      "type": "Sheet-Level Manipulation"
+    }
+  ]
+}
