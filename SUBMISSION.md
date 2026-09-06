@@ -62,10 +62,10 @@ The pipeline executes model-written Python, so it runs in Docker:
 
 ```sh
 docker build -t a1 .
-docker run --rm -e TINKER_API_KEY -e TINKER_PROJECT_ID -v <dataset dir>:/data:ro -v <empty dir>:/out a1
+docker run --rm -e TINKER_API_KEY -v <dataset dir>:/data:ro -v <empty dir>:/out a1
 ```
 
-Environment variables: `TINKER_API_KEY` (Tinker API key), `TINKER_PROJECT_ID` (the Tinker project the key belongs to). The model id is fixed in `a1/run.py` and `a1/tinker_llm.py`.
+Environment variables: `TINKER_API_KEY` only. The team's Tinker project id and the model id are fixed in code (`a1/tinker_llm.py`, `a1/run.py`), so the container runs exactly the way we ran it; setting `TINKER_PROJECT_ID` explicitly overrides the default.
 
 ## Future work
 
