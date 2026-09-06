@@ -18,12 +18,11 @@ from .sbio import answer_cells, read_answer_region
 from .serialize import serialize_workbook
 
 VALUE_RULES = """Grading rules for the answer cells (only these cells are compared, by VALUE, after recalculation):
-- Write plain computed VALUES, never formula strings. Numbers are compared rounded to 2 decimals.
-- Dates must be real date/datetime objects (or the exact Excel serial number), never text like "2024-03-01".
-- Booleans must be real booleans (True/False), not 1/0 and not "TRUE".
-- A cell that should be empty must be empty (None). Empty string equals empty.
-- Text must match exactly (case, spacing, punctuation), except text that parses as a number is compared numerically.
-- Never write leading or trailing whitespace in a text value; strip() strings you assemble or copy.
+- COPIED values: anything that already exists in the workbook and is being moved, copied, filtered, sorted, split, transposed or deduplicated must be written EXACTLY as stored: same type, same case, same leading/trailing whitespace, dates stored as text stay text, numbers stored as text stay text. Do not strip(), reformat or convert copied values.
+- COMPUTED values (results your script calculates): write plain values, never formula strings. Numbers are compared rounded to 2 decimals. New dates must be real date/datetime objects (or the Excel serial), not text. Booleans must be real True/False. No leading/trailing whitespace on text you assemble yourself.
+- Fill the WHOLE answer region the instruction implies: headers, labels, a TOTAL row, the last row of a filled-down column. After writing, print the region and treat every empty cell as a bug unless the instruction requires it empty.
+- A cell that should be empty must be empty (None); never write placeholders such as "#N/A", "N/A", "None" or "" when there is no result.
+- Text must match exactly (case, spacing, punctuation). Reuse the exact spelling and case of labels from the instruction or the workbook.
 - Do not change the sheet names of the workbook."""
 
 CODE_SYSTEM = """You are an expert spreadsheet engineer. You receive a serialized Excel workbook and a user instruction from an Excel forum. Instead of answering in text, you write ONE Python script that computes the result from the real workbook and writes it into the answer region.
@@ -61,7 +60,7 @@ stdout:
 
 VERIFY_SYSTEM = """You are a meticulous spreadsheet QA reviewer. You get a user instruction, workbook context, and the values a candidate solution wrote into the graded answer region. Decide whether the values plausibly satisfy the instruction.
 
-Check: correct interpretation of the instruction, sane magnitudes, right data types (dates as dates, numbers as numbers), no leftover formula strings, region actually filled where it should be, empty where it should be empty. If the dump lists EMPTY cells, decide whether the instruction really implies those exact cells stay empty — partially filled regions are the most common near-miss.
+Check: correct interpretation of the instruction, sane magnitudes, no leftover formula strings, region actually filled where it should be (headers, labels, totals included), empty where it should be empty. Values copied from the original workbook must be byte-for-byte identical to the BEFORE/original cells (same case, whitespace, text dates stay text); only newly computed values need proper types. Do not fail an output for preserving the original formatting of copied values. If the dump lists EMPTY cells, decide whether the instruction really implies those exact cells stay empty — partially filled regions are the most common near-miss.
 
 Reply with JSON only: {"pass": true} or {"pass": false, "issue": "<one concrete sentence on what is wrong and how to fix it>"}"""
 
@@ -107,8 +106,12 @@ def write_direct_answer(task, cells: list[dict], out_path: Path):
 
 
 def hygiene_issues(out_path: Path, task) -> str | None:
-    """Mechanical checks on the written answer region: formula strings, stray whitespace."""
+    """Mechanical checks on the written answer region: formula strings, stray whitespace on computed text."""
     wb = openpyxl.load_workbook(out_path)
+    source = set()  # text values present in the input workbook: copied values may legitimately keep their padding
+    for ws in openpyxl.load_workbook(task["init_xlsx"], read_only=True, data_only=True).worksheets:
+        for row in ws.iter_rows(values_only=True):
+            source.update(v for v in row if isinstance(v, str))
     formulas, padded = [], []
     for sheet, coord in answer_cells(task, wb):
         ws = wb[sheet] if sheet and sheet in wb.sheetnames else wb.active
@@ -116,15 +119,15 @@ def hygiene_issues(out_path: Path, task) -> str | None:
         if isinstance(v, str):
             if v.startswith("="):
                 formulas.append(f"{ws.title}!{coord}")
-            elif v != v.strip() and v.strip():
+            elif v != v.strip() and v.strip() and v not in source:
                 padded.append(f"{ws.title}!{coord}")
     problems = []
     if formulas:
         problems.append(f"You wrote formula STRINGS into answer cells ({', '.join(formulas[:5])}...). "
                         "Write computed plain values instead.")
     if padded:
-        problems.append(f"Text values with leading/trailing whitespace in {', '.join(padded[:8])}"
-                        f"{'...' if len(padded) > 8 else ''}. Strip whitespace; grading compares text exactly.")
+        problems.append(f"Computed text values with leading/trailing whitespace in {', '.join(padded[:8])}"
+                        f"{'...' if len(padded) > 8 else ''}. Strip whitespace on values you assemble; copied values stay verbatim.")
     return " ".join(problems) or None
 
 
@@ -152,9 +155,9 @@ class TaskRunner:
             "tool": name, "tool_input": tool_input[:20_000], "tool_output": tool_output[:8_000],
         })
 
-    async def _call(self, system, user, phase):
+    async def _call(self, system, user, phase, effort=None):
         try:
-            rec = await self.client.complete(system, user)
+            rec = await self.client.complete(system, user, effort=effort)
             rec["phase"] = phase
             self._trace_llm(rec)
             return rec["response"]
@@ -223,7 +226,10 @@ class TaskRunner:
                     return "ok"  # advisory issues at this point; a produced output beats the fallback
                 return f"error: code failed: {clean_status(result['stderr'], 150)}"
             try:
-                reply = await self._call(system, task_user + "\n\n" + REPAIR_USER.format(**result), "repair")
+                # a missing code block means the reply spent its budget reasoning: retry with medium effort, code only
+                effort = "medium" if code is None else None
+                reply = await self._call(system, task_user + "\n\n" + REPAIR_USER.format(**result)
+                                         + ("\n\nReply with the code block only, no plan." if code is None else ""), "repair", effort=effort)
             except LLMError as e:
                 return "ok" if produced_any else f"error: {clean_status(e)}"
             code = extract_code(reply)

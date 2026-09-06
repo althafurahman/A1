@@ -23,8 +23,10 @@ class TinkerClient:
         self._types = types
         self._sampler = tinker.ServiceClient().create_sampling_client(
             base_model=base_model, model_path=model_path)
-        self._renderer = renderers.get_renderer(
-            get_recommended_renderer_name(base_model), get_tokenizer(base_model))
+        tok = get_tokenizer(base_model)
+        self._renderer = renderers.get_renderer(get_recommended_renderer_name(base_model), tok)
+        # ponytail: second renderer only for retries after a reply exhausted its tokens in reasoning
+        self._renderer_medium = renderers.get_renderer("qwen3_8_medium_reasoning", tok) if "3.8" in base_model else self._renderer
         self._stop = self._renderer.get_stop_sequences()
 
     async def close(self):
@@ -34,10 +36,11 @@ class TinkerClient:
 
     # Qwen3.8-27B's recommended renderer thinks at length: 8192 truncates mid-reasoning,
     # 24576 was validated on the baseline smoke tests. Script-style replies stay well under it.
-    async def complete(self, system: str, user: str, max_tokens: int = 24_576) -> dict:
+    async def complete(self, system: str, user: str, max_tokens: int = 24_576, effort: str | None = None) -> dict:
         started = time.time()
+        renderer = self._renderer_medium if effort == "medium" else self._renderer
         messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
-        model_input = self._renderer.build_generation_prompt(messages)
+        model_input = renderer.build_generation_prompt(messages)
         available = self.CONTEXT_WINDOW - model_input.length - 64
         if available < 6_000:  # not enough room left to think and answer
             raise LLMError(f"prompt too long: {model_input.length} tokens leaves {available} to sample")
@@ -48,7 +51,7 @@ class TinkerClient:
                 response = await self._sampler.sample_async(
                     prompt=model_input, num_samples=1, sampling_params=params)
                 tokens = response.sequences[0].tokens
-                content = self._renderer.parse_response(tokens)[0]["content"]
+                content = renderer.parse_response(tokens)[0]["content"]
                 if not isinstance(content, str):  # thinking renderers return parts
                     content = "".join(p.get("text", "") for p in content if p.get("type") == "text")
                 return {
