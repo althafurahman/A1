@@ -116,6 +116,44 @@ on non-ok status; completed answers were never re-rolled.
   about 5000-row ranges before emitting code; init copies stand in, status honest).
 - Night's spend: ~7.6M output tokens, ≈$45. Total credits used to date ≈$55 of $1,000.
 
+## LoRA SFT experiment (user's session, branch `lora-sft`, 2026-09-06 04:40-06:00)
+
+Goal: a model-side improvement feasible in the remaining hours, following the Tinker talk's text-to-SQL lesson (put task expertise into weights, cut test-time scaffolding). RL was ruled out by arithmetic (one GRPO step at ~15k thinking tokens per sample is ~8M tokens, ~18 h at the shared rate). Chosen: rejection-sampling SFT on the harness's own verified outputs, trained to emit the script with an empty think block.
+
+- Data: `scripts/build_sft.py` rebuilt the exact inference prompt for every task that PASSED in the 400 run and is not in `experiments/heldout78.ids` (78 stratified held-out ids incl. dev16); target = the code/repair reply that produced the last successful script. 258 examples, 665k tokens (median 1,852/example), 17 skipped as too long, 5 without a usable reply, 10 samples hand-audited (all read the workbook, none hard-code answers). Golden files were used only to SELECT examples; disclosed in SUBMISSION.md.
+- Training: `scripts/train_sft.sh sft-001` = cookbook `chat_sl` recipe, `Qwen/Qwen3.8-27B`, LoRA rank 32, lr 2e-4, batch 32, 2 epochs = 16 steps, 1.34M elapsed tokens, ~4 s/step, final train NLL 0.205 (from 0.228). Checkpoint (no TTL): `tinker://17741918-b3a7-5ae6-bf92-9556e1033720:train:0/sampler_weights/final`. Cost about $6.
+- Evaluation `experiments/heldout78-sft-001/` (same harness, `--model-path`, concurrency 16, ~10 min, ~$3.5) vs the base model's own results on the same 78 ids from the 400 run:
+
+  | | base model | fine-tuned |
+  |---|---|---|
+  | pass | 68/78 | 52/78 |
+  | cell-level / sheet-level pass | 35/40, 33/38 | 27/40, 25/38 |
+  | cell_accuracy | ~0.97 | 0.986 |
+  | mean output tokens/task | 18,104 | 1,313 |
+  | mean model seconds/task | 335 | 50 |
+  | mean model calls/task | 2.28 | 3.47 |
+
+- Reading: the fine-tune keeps the code style and speed (14x fewer tokens, 7x faster) but loses the reasoning that decides *what* to compute: failures are interpretation errors (wrong count rule, wrong rows), not truncation or plumbing; 20 of 26 failures are partial (high cell accuracy). Because verify/repair use the same no-think model, the verifier also weakened: it passed 12 of the 26 failing outputs, and 9 tasks looped through repair without converging. Won 2 tasks the base missed (51090, 37900), lost 18.
+- Decision per the pre-agreed gate (within 2 tasks of base): NOT used for the submission. The base-model 400 run on `main` stands. Documented as an experiment. Natural follow-ups (not attempted, no time): cascade (fine-tuned first, base model when the verifier rejects), keep the base model for the verify phase, or SFT targets that retain a short thinking trace.
+## Failure taxonomy of the 52 fails (morning, from results.json + traces)
+
+20 near-miss (≥90% of cells right), 20 partial, 12 zero-correct. Notable honest findings:
+- The strip-whitespace hygiene rule cuts both ways: 290-27 expected 'GG ' (trailing space kept
+  in golden), 341-40 expected ' Sales' (leading space) — we strip and lose those cells, while
+  the same rule won 230-16 on dev16. Net effect unknowable without golden access; disclosed.
+- 269-43: golden stores dates as TEXT ('2022/01/26'); our real-datetime rule loses there.
+  The reverse of the baseline's dates-as-text failure — some goldens genuinely want text.
+- 41-47: 6395/6403 cells right, missing 8 'TOTAL' label rows.
+- 118-50, 42216 (the 2 no-answer errors): model exhausts 24576 tokens mid-think before emitting
+  code. Morning fix: the no-code-block repair retry now escalates max_tokens to 45k (context
+  clamp still protects the ceiling). Errored-id re-run in `experiments/error-retry-001/` —
+  same disclosed policy as the night segments; completed answers never re-rolled.
+  OUTCOME: both still fail at 45k (118-50 never emits code; 42216's script arrives truncated
+  mid-line) — a genuine capability edge of the 27B on these two tasks, not a budget problem.
+  Submitted artifacts unchanged; the escalation fix stays in the code where it can help the
+  judges' holdout run. Note: 118-50's graded region is ~10k cells of which only 22 differ from
+  the init workbook — one reason cell_accuracy (0.9729) sits far above pass_rate.
+
 ## ext40 generalisation set (user's session, branch `ext40-data`, 2026-09-06 03:00)
 
 - `experiments/ext40/`: 40 unseen tasks from the original SpreadsheetBench 912 (HF KAKA22/SpreadsheetBench, CC BY-SA 4.0; tarball sha256 9cf7228b...3399) that are not in the Verified 400. Built by `scripts/build_ext40.py` (seed 1): 512 candidates, dropped 3 empty instructions, 93 formatting/volatile, 28 unchanged answer range, 24 missing answer sheet, 13 >2000 cells, 1 unloadable; 353 eligible; 10 per bucket (cell/sheet x <=15/>15 cells). Renamed to the Verified layout; oracle 1.0 on 40/40.
