@@ -83,6 +83,14 @@ JSON-answer fallback only if the code path produced no output at all. Backend: T
   $A1_ALLOWED_MODEL_ID never reaches the shell, root-vs-research .env mismatch). Findings shared
   with the user; team-authored doc fixes still to apply.
 
+## Docker and submission prep (user's session, 2026-09-06 01:00-01:35)
+
+- Docker image built and run exactly per the judge contract (`/data` read-only, empty `/out`, keys via env): tasks 51-12 and 79-7 both status ok and PASS under the shipped evaluator; traces carry every required field plus phase/tool lines; no `golden` string in prompts or traces.
+- Dockerfile hardened without changing pipeline behaviour: CPU-only torch index (image 9.75 GB -> 2.06 GB; avoids CUDA wheels on x86 judge machines) and the Qwen3.8 tokenizer baked at build time so start-up does not depend on Hugging Face.
+- Cost profile seen in-container: a 1-cell task spent 17,929 output tokens (366 s) in the code call at default (xhigh) reasoning effort; the verify call 1,248 tokens. Reasoning effort is the main time lever if a rerun is ever needed.
+- `scripts/finalize.sh <run dir>`: scores with `--all`, copies predictions/outputs/traces/run.log/results.json to the repo root, greps traces for `golden`. `scripts/analyse_run.py <run dir>`: per-task calls/tokens/time and failure buckets.
+- `SUBMISSION.md` drafted for the Tinker pipeline (model id, env vars, trace truncation declared, evidence paths that exist). Still to fill: member handles and the scores block.
+
 ## Collaboration
 
 Claude Code (user's session) edited on branch `baseline-setup`: `.gitignore`, `MEMORY.md`, `research/` import. Second Claude Code session (this one) rebased the `a1/` harness work onto `baseline-setup` and pushed; it currently claims `a1/*`, root `README.md`, `MEMORY.md`. User's Claude Code session (2026-09-06 00:45) claims `SUBMISSION.md` (drafted for the Tinker route; scores block left for after the full run). Before concurrent edits, record owner and files here, then release when finished. Do not duplicate paid experiments.
