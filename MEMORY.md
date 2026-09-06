@@ -85,7 +85,7 @@ JSON-answer fallback only if the code path produced no output at all. Backend: T
 
 ## Collaboration
 
-Claude Code (user's session) edited on branch `baseline-setup`: `.gitignore`, `MEMORY.md`, `research/` import. Second Claude Code session (this one) rebased the `a1/` harness work onto `baseline-setup` and pushed; it currently claims `a1/*`, root `README.md`, `MEMORY.md`. Before concurrent edits, record owner and files here, then release when finished. Do not duplicate paid experiments.
+Claude Code (user's session) edited on branch `baseline-setup`: `.gitignore`, `MEMORY.md`, `research/` import. Second Claude Code session (this one) rebased the `a1/` harness work onto `baseline-setup` and pushed; it currently claims `a1/*`, root `README.md`, `MEMORY.md`. User's Claude Code session (2026-09-06 00:45) claims `SUBMISSION.md` (drafted for the Tinker route; scores block left for after the full run). Before concurrent edits, record owner and files here, then release when finished. Do not duplicate paid experiments.
 
 ## Next action
 
