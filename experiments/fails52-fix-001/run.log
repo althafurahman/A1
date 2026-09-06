@@ -1,0 +1,54 @@
+A1 backend=tinker model=Qwen/Qwen3.8-27B strategy=full tasks=52 concurrency=16
+269-43   ok
+203-15   ok
+230-16   ok
+408-5    ok
+130-9    ok
+61-4     ok
+290-27   ok
+22-47    ok
+374-31   ok
+118-50   ok
+448-11   ok
+343-20   ok
+486-17   ok
+13-1     ok
+267-18   ok
+402-43   ok
+398-14   ok
+45300    ok
+341-40   ok
+170-13   ok
+37900    ok
+534-26   ok
+493-5    ok
+209-30   ok
+146-49   ok
+51090    ok
+12864    ok
+50486    ok
+524-31   ok
+49036    ok
+41-47    error: error: code failed: Traceback (most recent call last): File "/private/var/folders/9f/fkqw4mz129n81mf4gz43xzr00000gn/T/tmp7zai2dzy/script.py", line 3, in <module> idx = ne; direct fallback failed: Extra data: line 1 column 73 (char 72)
+387-16   ok
+48983    ok
+51680    ok
+80-42    error: error: code failed: script exited 0 but wrote no output.xlsx; direct fallback failed: Extra data: line 1 column 14 (char 13)
+54667    ok
+54590    ok
+13284    ok
+11842    ok
+32789    ok
+50631    ok
+55977    ok
+58484    ok
+59129    ok
+56915    ok
+44017    ok
+55427    ok
+32023    ok
+56786    ok
+42216    ok
+9569     error: error: code failed: Traceback (most recent call last): File "/private/var/folders/9f/fkqw4mz129n81mf4gz43xzr00000gn/T/tmp_d3vn_w7/script.py", line 3, in <module> s = s.re; direct fallback failed: Extra data: line 2 column 1 (char 72)
+45738    ok
+finished: 52/52 predictions written
