@@ -8,7 +8,7 @@ cell-for-cell against a golden workbook after recalculation.
 **Result:** pass_rate **0.870** on all 400 tasks (cell accuracy 0.9729), against the
 59.0% one-shot reference baseline. Method, scores and artifact paths:
 [SUBMISSION.md](SUBMISSION.md). Dated lab notebook of every run, failure category and
-decision: [MEMORY.md](MEMORY.md).
+decision: [LABNOTES.md](LABNOTES.md).
 
 ## Approach
 

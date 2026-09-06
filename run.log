@@ -1,4 +1,4 @@
-===== experiments/full-400-001 (segment of the merged run; see MEMORY.md) =====
+===== experiments/full-400-001 (segment of the merged run; see LABNOTES.md) =====
 A1 backend=tinker model=Qwen/Qwen3.8-27B strategy=full tasks=400 concurrency=16
 41-47    error: error: tinker sampling failed after 3 attempts: Error code: 400 - {'detail': "Prompt length plus max_tokens exceeds the model's context window: 67513 prompt tokens + 24576 max_tokens > 65; direct fallback failed: tinker sampling failed after 3
 279-23   ok
@@ -253,7 +253,7 @@ A1 backend=tinker model=Qwen/Qwen3.8-27B strategy=full tasks=400 concurrency=16
 32337    ok
 32438    ok
 37378    ok
-===== experiments/full-400-002 (segment of the merged run; see MEMORY.md) =====
+===== experiments/full-400-002 (segment of the merged run; see LABNOTES.md) =====
 A1 backend=tinker model=Qwen/Qwen3.8-27B strategy=full tasks=164 concurrency=10
 209-30   ok
 183-8    ok
@@ -266,7 +266,7 @@ A1 backend=tinker model=Qwen/Qwen3.8-27B strategy=full tasks=164 concurrency=10
 341-40   ok
 80-42    ok
 3911     ok
-===== experiments/full-400-003 (segment of the merged run; see MEMORY.md) =====
+===== experiments/full-400-003 (segment of the merged run; see LABNOTES.md) =====
 A1 backend=tinker model=Qwen/Qwen3.8-27B strategy=full tasks=154 concurrency=10
 9391     ok
 51090    ok
@@ -278,7 +278,7 @@ A1 backend=tinker model=Qwen/Qwen3.8-27B strategy=full tasks=154 concurrency=10
 36764    ok
 41-47    ok
 35739    ok
-===== experiments/full-400-004 (segment of the merged run; see MEMORY.md) =====
+===== experiments/full-400-004 (segment of the merged run; see LABNOTES.md) =====
 A1 backend=tinker model=Qwen/Qwen3.8-27B strategy=full tasks=144 concurrency=16
 40757    ok
 40892    ok

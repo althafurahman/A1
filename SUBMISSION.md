@@ -30,7 +30,7 @@ cell_accuracy 0.9729. Limits, honestly: 2/400 produced no answer (the model exha
 budget thinking about 5000-row ranges before emitting code); sampling wobbles ±1–2 tasks
 even at temperature 0; the run executed in four segments after two external process
 kills and a mid-run 64k-context fix — errored ids were re-run with the fixed harness,
-completed answers were never re-rolled (chronology in MEMORY.md). No fine-tuning at
+completed answers were never re-rolled (chronology in LABNOTES.md). No fine-tuning at
 inference (experiment below).
 
 ## Models
@@ -64,7 +64,7 @@ uv run evaluate.py --predictions predictions.jsonl --all --out results.json
 - `traces/`: repo root, one `<id>.jsonl` per task, one line per model call, plus tool
   lines (`tool`, `tool_input`, `tool_output`) for each script execution. Prompt fields
   are truncated to 20,000 characters and tool output to 8,000 characters.
-- `run.log`: repo root (four segments, concatenated; chronology in MEMORY.md)
+- `run.log`: repo root (four segments, concatenated; chronology in LABNOTES.md)
 
 ## Code
 
@@ -89,5 +89,5 @@ Tinker project the key belongs to). The model id is fixed in `a1/run.py` and
 - `experiments/dev16.ids` — the stratified dev subset (4 tasks per cell/sheet x small/large answer range bucket).
 - `a1/harness.py` — the pipeline: prompts, hygiene checks, verifier, repair loop.
 - `a1/serialize.py` — answer-region-aware serialisation; why the one-shot baseline is blind on workbooks larger than 120 rows.
-- `MEMORY.md` — dated log of every run, failure category, cost and decision, including the full-400 chronology.
-- `experiments/ext40/` and `experiments/ext40-base-001/results.json` — generalisation check on 40 unseen tasks from the original SpreadsheetBench pool (not in the Verified 400; built by `scripts/build_ext40.py`, caveat in the README): 26/40 pass vs 87% on the 400; failure analysis in MEMORY.md.
+- `LABNOTES.md` — dated log of every run, failure category, cost and decision, including the full-400 chronology.
+- `experiments/ext40/` and `experiments/ext40-base-001/results.json` — generalisation check on 40 unseen tasks from the original SpreadsheetBench pool (not in the Verified 400; built by `scripts/build_ext40.py`, caveat in the README): 26/40 pass vs 87% on the 400; failure analysis in LABNOTES.md.
