@@ -1,6 +1,6 @@
 # A1 shared working memory
 
-Updated: 2026-09-05 (evening, after dev16 batch). Record facts, not assumed progress.
+Updated: 2026-09-06 09:15 (final status section below). Record facts, not assumed progress.
 
 ## Current state
 
@@ -160,6 +160,16 @@ Goal: a model-side improvement feasible in the remaining hours, following the Ti
 - Caveat: unverified leftover pool, so treat ext40 scores as relative between configs.
 - `experiments/ext40-base-001` (base harness from origin/main f61cc7a, concurrency 16, 04:43-05:09, ~$6.5, mean 25k output tokens/task): pass_rate 0.65 (26/40), cell_accuracy 0.863, cell-level 14/20, sheet-level 12/20. Versus 0.87 / 0.909 / 0.784 on the Verified 400: a ~20-point drop. Of the 14 fails: 2 are the whitespace-strip rule (321-9 leading space, 315-23 trailing spaces; 882/884 and 741/742 cells), 1 case ('Undefined' vs 'undefined'), 1 harness error (56637 no code block), ~2-3 look like golden quirks of the unverified pool (61-1 suffix applied three times, 98-21 rounding split), the rest genuine wrong values, mostly cell-level formula tasks (lookups, conditional sums). Honest read: ~12-15 points of real generalisation gap beyond self-inflicted rules and label noise.
 - Same self-inflicted pattern on the 400 (results.json at root): of 52 fails, 7 whitespace-strip, 4 text-date-converted, 18 empty header/label cells. Prompt fix for the teammate: values copied or moved from existing cells must be copied verbatim (type and whitespace); typing/strip rules apply only to newly computed values; drop the padded-whitespace repair check for copied values.
+
+## Final status (2026-09-06 09:15, user's session)
+
+- Submission = `main` at the merge of PR #4 (4eea0ab or later doc commits). Root `predictions.jsonl`, `outputs/`, `traces/`, `run.log`, `results.json` are the full-400 run: pass_rate 0.87 (348/400), cell_accuracy 0.9729, cell-level 0.9091, sheet-level 0.784. Model `Qwen/Qwen3.8-27B` via Tinker, temperature 0, no fine-tune at inference. Docker image verified per the judge contract (2.06 GB, tokenizer baked in).
+- One harness change after the run (46fb92d, wider retry token budget) is declared in SUBMISSION.md with both commit ids; the LoRA SFT experiment (52/78 held-out vs 68/78 base, 14x fewer tokens) is documented and not used at inference.
+- Generalisation: `experiments/ext40` (40 unseen tasks from the original 912 pool) scores 26/40 with the submitted harness vs 87% on the 400; ~3 points are self-inflicted value rules, ~2-3 label noise, the rest a real gap concentrated in cell-level lookups. Run-to-run variance is ~3-4 tasks per 40.
+- Branch `prompt-fixes` (NOT merged): copy-verbatim value rules + source-aware whitespace check + medium-effort retry; recovers 19/52 of the 400's failures (4 whitespace, 4 text-date, 4 missing header, 7 other), neutral on ext40 (25 vs 26). First change to apply after the hackathon, with a two-run evaluation.
+- Branches: `main` (submission), `baseline-setup` (merged), `ext40-data` (merged), `lora-sft` (merged), `prompt-fixes` (open evidence). Worktree `A1-ext40` removed; `research/data/spreadsheetbench_912_v0.1*` stays local (gitignored).
+- Credits: roughly $55 for the 400 run, ~$25 for dev/ext40/targeted runs, ~$12 for the SFT; all under the $1,000 budget.
+- Next after the deadline: merge `prompt-fixes` and rerun the 400 twice; add an exploration turn before the script for cell-level lookup tasks; formula mode with LibreOffice recalculation in the container.
 
 ## Collaboration
 
