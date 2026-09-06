@@ -1,0 +1,1 @@
+How can I create an Excel formula to look up a tariff from a selection and cross reference it with a usage value to calculate the corresponding monthly fee from a table? I have tried using IF functions and a long formula for one tariff, but I'm looking for a more efficient solution that can handle multiple tariffs and usage scenarios.

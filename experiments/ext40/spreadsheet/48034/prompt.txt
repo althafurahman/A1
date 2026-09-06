@@ -1,0 +1,1 @@
+How can I calculate the average of data that is in a 'Years/Months' format (e.g., 7/5 for 7 years and 5 months) in Excel, ensuring that the result is in the same format and that blank cells are ignored? I am using Excel 2016.

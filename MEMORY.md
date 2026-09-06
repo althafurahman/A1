@@ -91,6 +91,11 @@ JSON-answer fallback only if the code path produced no output at all. Backend: T
 - `scripts/finalize.sh <run dir>`: scores with `--all`, copies predictions/outputs/traces/run.log/results.json to the repo root, greps traces for `golden`. `scripts/analyse_run.py <run dir>`: per-task calls/tokens/time and failure buckets.
 - `SUBMISSION.md` drafted for the Tinker pipeline (model id, env vars, trace truncation declared, evidence paths that exist). Still to fill: member handles and the scores block.
 
+## ext40 generalisation set (user's session, branch `ext40-data`, 2026-09-06 03:00)
+
+- `experiments/ext40/`: 40 unseen tasks from the original SpreadsheetBench 912 (HF KAKA22/SpreadsheetBench, CC BY-SA 4.0; tarball sha256 9cf7228b...3399) that are not in the Verified 400. Built by `scripts/build_ext40.py` (seed 1): 512 candidates, dropped 3 empty instructions, 93 formatting/volatile, 28 unchanged answer range, 24 missing answer sheet, 13 >2000 cells, 1 unloadable; 353 eligible; 10 per bucket (cell/sheet x <=15/>15 cells). Renamed to the Verified layout; oracle 1.0 on 40/40.
+- Caveat: unverified leftover pool, so treat ext40 scores as relative between configs. Nobody has run a model on it yet; first run is the base harness after the teammate's full 400 finishes (`--dataset-dir experiments/ext40`, ~10-15 min, ~$2-3). Also the clean generalisation check for any fine-tune checkpoint.
+
 ## Collaboration
 
 Claude Code (user's session) edited on branch `baseline-setup`: `.gitignore`, `MEMORY.md`, `research/` import. Second Claude Code session (this one) rebased the `a1/` harness work onto `baseline-setup` and pushed; it currently claims `a1/*`, root `README.md`, `MEMORY.md`. User's Claude Code session (2026-09-06 00:45) claims `SUBMISSION.md` (drafted for the Tinker route; scores block left for after the full run). Before concurrent edits, record owner and files here, then release when finished. Do not duplicate paid experiments.

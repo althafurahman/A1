@@ -14,3 +14,5 @@ experiments/*/traces/
 # Downloaded upstream benchmark is local only.
 research/data/spreadsheetbench_verified_400/
 research/data/spreadsheetbench_verified_400.tar.gz
+research/data/spreadsheetbench_912_v0.1/
+research/data/spreadsheetbench_912_v0.1.tar.gz

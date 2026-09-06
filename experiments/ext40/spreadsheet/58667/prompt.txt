@@ -1,0 +1,1 @@
+I have a spreadsheet for tracking student attendance and I need the spreadsheet to automatically duplicate the 'Holiday' entry across all students for a given day when I select 'Holiday' from a drop-down list for one student. I require a solution that accomplishes this without using VBA.

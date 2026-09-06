@@ -1,0 +1,1 @@
+I have a two-column table in Excel with columns for 'Miles' and 'Trip #'. I need a formula that can automatically input the next 'Trip #' when I enter a mileage number in the 'Miles' column. For example, the last entry in the 'Miles' column is 450, and I want the next row to automatically display 'Trip #6'. Can someone help me with this?

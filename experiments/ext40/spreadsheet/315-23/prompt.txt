@@ -1,0 +1,1 @@
+How can I quickly delete rows from an Excel dataset containing over 800,000 rows if a cell in a particular column (approverID) starts with 'PC', while retaining rows where the cell starts with 'PH'?

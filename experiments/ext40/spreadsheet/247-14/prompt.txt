@@ -1,0 +1,1 @@
+I am working on an Excel task and need to create a macro that calculates frequency dates between two given dates. Specifically, for the term 'MONTHLY,' I mean every calendar month based on the start date (like 01/01/2021, 02/01/2021, etc.), not every 28 days. Can anyone assist me with writing this macro?
