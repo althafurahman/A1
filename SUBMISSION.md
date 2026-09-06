@@ -39,6 +39,11 @@ completed answers were never re-rolled (chronology in MEMORY.md). No fine-tuning
   temperature 0, max_tokens 24576 clamped to the 64k context. Every call in the pipeline
   (code generation, repair, verification, direct fallback) uses this model.
 
+## Fine-tuning experiment (not used at inference)
+
+- Base model `Qwen/Qwen3.8-27B`, LoRA rank 32, lr 2e-4, batch 32, 2 epochs (16 steps, 1.34M tokens, ~1 minute of training on Tinker). Sampler checkpoint, TTL cleared: `tinker://17741918-b3a7-5ae6-bf92-9556e1033720:train:0/sampler_weights/final`.
+- Training data: 258 prompt-to-script pairs taken from our own 400 run (`experiments/sft-001/train.jsonl`, ids in `train_ids.txt`), selected because the shipped evaluator marked them as passing, so the 400 golden files influenced example selection. 78 stratified tasks (`experiments/heldout78.ids`) were never trained on and are the only numbers we report for it: 52/78 pass vs 68/78 for the base model on the same tasks, at 1,313 vs 18,104 output tokens per task.
+
 ## Scores on the 400
 
 Produced by the shipped evaluator (`results.json` in the repo root):
