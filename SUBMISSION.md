@@ -30,7 +30,8 @@ cell_accuracy 0.9729. Limits, honestly: 2/400 produced no answer (the model exha
 budget thinking about 5000-row ranges before emitting code); sampling wobbles ±1–2 tasks
 even at temperature 0; the run executed in four segments after two external process
 kills and a mid-run 64k-context fix — errored ids were re-run with the fixed harness,
-completed answers were never re-rolled (chronology in MEMORY.md). No fine-tuning.
+completed answers were never re-rolled (chronology in MEMORY.md). No fine-tuning at
+inference (experiment below).
 
 ## Models
 
