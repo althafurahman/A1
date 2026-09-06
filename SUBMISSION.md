@@ -67,6 +67,8 @@ uv run evaluate.py --predictions predictions.jsonl --all --out results.json
 
 ## Code
 
+The code that produced the run is in the repo. One change landed after the run: commit 46fb92d widens the retry token budget from 24,576 to 45,000 when a reply is cut off mid-reasoning (a1/harness.py); the 400-task run above was produced at commit 6a77606 without it, and the two tasks that errored there still fail with it.
+
 The pipeline executes model-written Python, so it runs in Docker:
 
 ```sh
