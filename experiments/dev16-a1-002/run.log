@@ -1,0 +1,18 @@
+A1 backend=tinker model=Qwen/Qwen3.8-27B strategy=full tasks=16 concurrency=6
+472-15   ok
+79-7     ok
+156-14   ok
+203-15   ok
+48588    ok
+36764    ok
+33722    ok
+41265    ok
+41348    ok
+263-1    ok
+230-16   ok
+408-39   ok
+55049    ok
+57232    ok
+183-8    error: error: no code block in reply; direct fallback failed: no JSON in reply: 'Let me analyze this problem carefully.\n\nThe user wants to calculate weighted averages for columns J, K, and L based on t'
+55976    ok
+finished: 16/16 predictions written

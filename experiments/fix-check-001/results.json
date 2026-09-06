@@ -1,0 +1,58 @@
+{
+  "summary": {
+    "items": 2,
+    "graded": 2,
+    "missing": 0,
+    "errors": 0,
+    "pass_rate": 0.5,
+    "cell_accuracy": 0.9405,
+    "pass_rate_cell_level": null,
+    "pass_rate_sheet_level": 0.5
+  },
+  "items": [
+    {
+      "status": "graded",
+      "cells": 156,
+      "correct": 156,
+      "pass": true,
+      "mismatches": [],
+      "id": "156-14",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 12,
+      "correct": 2,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "Before!A1",
+          "expected": "data",
+          "actual": null
+        },
+        {
+          "cell": "Before!A2",
+          "expected": "2020-02-21 09:58:34.595555",
+          "actual": "data"
+        },
+        {
+          "cell": "Before!A3",
+          "expected": "2020-02-22 14:35:59.356666",
+          "actual": "2020-02-21 09:58:34.595555"
+        },
+        {
+          "cell": "Before!A4",
+          "expected": "2020-02-23 14:41:01.412",
+          "actual": "2020-02-22 14:35:59.356666"
+        },
+        {
+          "cell": "Before!A5",
+          "expected": "2020-02-23 14:40:11.618",
+          "actual": "2020-02-23 14:41:01.412"
+        }
+      ],
+      "id": "230-16",
+      "type": "Sheet-Level Manipulation"
+    }
+  ]
+}

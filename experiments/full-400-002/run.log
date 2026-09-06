@@ -1,0 +1,12 @@
+A1 backend=tinker model=Qwen/Qwen3.8-27B strategy=full tasks=164 concurrency=10
+209-30   ok
+183-8    ok
+455-35   ok
+23-24    ok
+48921    ok
+254-34   ok
+51090    error: error: code failed: Your reply contained no ```python code block. Reply with the complete script in exactly one ```python block.; direct fallback failed: no JSON in reply: "We need answer user's request: compute final values for answer range D
+191-40   ok
+341-40   ok
+80-42    ok
+3911     ok

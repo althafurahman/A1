@@ -1,0 +1,284 @@
+{
+  "summary": {
+    "items": 16,
+    "graded": 16,
+    "missing": 0,
+    "errors": 0,
+    "pass_rate": 0.625,
+    "cell_accuracy": 0.5164,
+    "pass_rate_cell_level": 0.875,
+    "pass_rate_sheet_level": 0.375
+  },
+  "items": [
+    {
+      "status": "graded",
+      "cells": 3,
+      "correct": 0,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "Sheet1!H2",
+          "expected": 3710,
+          "actual": "glass"
+        },
+        {
+          "cell": "Sheet1!H3",
+          "expected": 1660,
+          "actual": "metal"
+        },
+        {
+          "cell": "Sheet1!H4",
+          "expected": 2753,
+          "actual": "PVC"
+        }
+      ],
+      "id": "263-1",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 1,
+      "correct": 1,
+      "pass": true,
+      "mismatches": [],
+      "id": "472-15",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 4,
+      "correct": 4,
+      "pass": true,
+      "mismatches": [],
+      "id": "79-7",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 156,
+      "correct": 125,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "99250!A6",
+          "expected": 99328,
+          "actual": 99329
+        },
+        {
+          "cell": "99250!B6",
+          "expected": 209316,
+          "actual": 209215
+        },
+        {
+          "cell": "99250!D6",
+          "expected": 19285.35,
+          "actual": 20251.25
+        },
+        {
+          "cell": "99250!F6",
+          "expected": "Accepted",
+          "actual": "to be processed"
+        },
+        {
+          "cell": "99250!A7",
+          "expected": 99329,
+          "actual": 99328
+        }
+      ],
+      "id": "156-14",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 39,
+      "correct": 38,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "Output Required!M1",
+          "expected": "Total",
+          "actual": null
+        }
+      ],
+      "id": "203-15",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 12,
+      "correct": 2,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "Before!A1",
+          "expected": "data",
+          "actual": null
+        },
+        {
+          "cell": "Before!A2",
+          "expected": "2020-02-21 09:58:34.595555",
+          "actual": "data"
+        },
+        {
+          "cell": "Before!A3",
+          "expected": "2020-02-22 14:35:59.356666",
+          "actual": "2020-02-21 09:58:34.595555"
+        },
+        {
+          "cell": "Before!A4",
+          "expected": "2020-02-23 14:41:01.412",
+          "actual": "2020-02-22 14:35:59.356666"
+        },
+        {
+          "cell": "Before!A5",
+          "expected": "2020-02-23 14:40:11.618",
+          "actual": "2020-02-23 14:41:01.412"
+        }
+      ],
+      "id": "230-16",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 20,
+      "correct": 5,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "Sheet1!J3",
+          "expected": 18.6378159014417,
+          "actual": null
+        },
+        {
+          "cell": "Sheet1!K3",
+          "expected": 95.05311635354512,
+          "actual": null
+        },
+        {
+          "cell": "Sheet1!L3",
+          "expected": 98.72331182996263,
+          "actual": null
+        },
+        {
+          "cell": "Sheet1!J4",
+          "expected": 17.423765623262224,
+          "actual": null
+        },
+        {
+          "cell": "Sheet1!K4",
+          "expected": 94.17593045707682,
+          "actual": null
+        }
+      ],
+      "id": "183-8",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 5,
+      "correct": 5,
+      "pass": true,
+      "mismatches": [],
+      "id": "408-39",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 5,
+      "correct": 5,
+      "pass": true,
+      "mismatches": [],
+      "id": "33722",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 42,
+      "correct": 42,
+      "pass": true,
+      "mismatches": [],
+      "id": "48588",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 1,
+      "correct": 1,
+      "pass": true,
+      "mismatches": [],
+      "id": "36764",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 4,
+      "correct": 4,
+      "pass": true,
+      "mismatches": [],
+      "id": "41265",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 10,
+      "correct": 10,
+      "pass": true,
+      "mismatches": [],
+      "id": "41348",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 21,
+      "correct": 21,
+      "pass": true,
+      "mismatches": [],
+      "id": "55049",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 190,
+      "correct": 0,
+      "pass": false,
+      "mismatches": [
+        {
+          "cell": "Sea Freight Rates!H2",
+          "expected": 42.25,
+          "actual": null
+        },
+        {
+          "cell": "Sea Freight Rates!H3",
+          "expected": 28,
+          "actual": null
+        },
+        {
+          "cell": "Sea Freight Rates!H4",
+          "expected": 8.5,
+          "actual": null
+        },
+        {
+          "cell": "Sea Freight Rates!H5",
+          "expected": 8.5,
+          "actual": null
+        },
+        {
+          "cell": "Sea Freight Rates!H6",
+          "expected": 8.75,
+          "actual": null
+        }
+      ],
+      "id": "57232",
+      "type": "Cell-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 4,
+      "correct": 4,
+      "pass": true,
+      "mismatches": [],
+      "id": "55976",
+      "type": "Cell-Level Manipulation"
+    }
+  ]
+}

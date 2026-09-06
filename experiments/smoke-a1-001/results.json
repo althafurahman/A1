@@ -1,0 +1,32 @@
+{
+  "summary": {
+    "items": 2,
+    "graded": 2,
+    "missing": 0,
+    "errors": 0,
+    "pass_rate": 1.0,
+    "cell_accuracy": 1.0,
+    "pass_rate_cell_level": null,
+    "pass_rate_sheet_level": 1.0
+  },
+  "items": [
+    {
+      "status": "graded",
+      "cells": 120,
+      "correct": 120,
+      "pass": true,
+      "mismatches": [],
+      "id": "13-1",
+      "type": "Sheet-Level Manipulation"
+    },
+    {
+      "status": "graded",
+      "cells": 1,
+      "correct": 1,
+      "pass": true,
+      "mismatches": [],
+      "id": "51-12",
+      "type": "Sheet-Level Manipulation"
+    }
+  ]
+}

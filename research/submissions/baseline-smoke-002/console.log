@@ -1,0 +1,7 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+model Qwen/Qwen3.8-27B  tasks 2
+13-1     error: Expecting value: line 4 column 1 (char 81)
+51-12    error: no JSON object in reply: "We need answer user's request. Need compute final value for B6 based on instruction and workbook. Need output JSON only."
+Task was destroyed but it is pending!
+task: <Task pending name='tinker_session_futures_poller' coro=<SessionFuturesPoller._poll_loop() done, defined at /Users/mboosiri/Documents/01 PROJECTS/Ylookup-hackathon/A1/research/.venv/lib/python3.13/site-packages/tinker/lib/session_futures_poller.py:121> wait_for=<Future pending cb=[Task.task_wakeup()]>>
+exit , elapsed 116s

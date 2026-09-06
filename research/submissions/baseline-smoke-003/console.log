@@ -1,0 +1,7 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+model Qwen/Qwen3.8-27B  tasks 2
+51-12    ok
+13-1     ok
+Task was destroyed but it is pending!
+task: <Task pending name='tinker_session_futures_poller' coro=<SessionFuturesPoller._poll_loop() running at /Users/mboosiri/Documents/01 PROJECTS/Ylookup-hackathon/A1/research/.venv/lib/python3.13/site-packages/tinker/lib/session_futures_poller.py:132> wait_for=<Future pending cb=[Task.task_wakeup()]>>
+exit , elapsed 159s
