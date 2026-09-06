@@ -135,6 +135,24 @@ Goal: a model-side improvement feasible in the remaining hours, following the Ti
 
 - Reading: the fine-tune keeps the code style and speed (14x fewer tokens, 7x faster) but loses the reasoning that decides *what* to compute: failures are interpretation errors (wrong count rule, wrong rows), not truncation or plumbing; 20 of 26 failures are partial (high cell accuracy). Because verify/repair use the same no-think model, the verifier also weakened: it passed 12 of the 26 failing outputs, and 9 tasks looped through repair without converging. Won 2 tasks the base missed (51090, 37900), lost 18.
 - Decision per the pre-agreed gate (within 2 tasks of base): NOT used for the submission. The base-model 400 run on `main` stands. Documented as an experiment. Natural follow-ups (not attempted, no time): cascade (fine-tuned first, base model when the verifier rejects), keep the base model for the verify phase, or SFT targets that retain a short thinking trace.
+## Failure taxonomy of the 52 fails (morning, from results.json + traces)
+
+20 near-miss (≥90% of cells right), 20 partial, 12 zero-correct. Notable honest findings:
+- The strip-whitespace hygiene rule cuts both ways: 290-27 expected 'GG ' (trailing space kept
+  in golden), 341-40 expected ' Sales' (leading space) — we strip and lose those cells, while
+  the same rule won 230-16 on dev16. Net effect unknowable without golden access; disclosed.
+- 269-43: golden stores dates as TEXT ('2022/01/26'); our real-datetime rule loses there.
+  The reverse of the baseline's dates-as-text failure — some goldens genuinely want text.
+- 41-47: 6395/6403 cells right, missing 8 'TOTAL' label rows.
+- 118-50, 42216 (the 2 no-answer errors): model exhausts 24576 tokens mid-think before emitting
+  code. Morning fix: the no-code-block repair retry now escalates max_tokens to 45k (context
+  clamp still protects the ceiling). Errored-id re-run in `experiments/error-retry-001/` —
+  same disclosed policy as the night segments; completed answers never re-rolled.
+  OUTCOME: both still fail at 45k (118-50 never emits code; 42216's script arrives truncated
+  mid-line) — a genuine capability edge of the 27B on these two tasks, not a budget problem.
+  Submitted artifacts unchanged; the escalation fix stays in the code where it can help the
+  judges' holdout run. Note: 118-50's graded region is ~10k cells of which only 22 differ from
+  the init workbook — one reason cell_accuracy (0.9729) sits far above pass_rate.
 
 ## Collaboration
 

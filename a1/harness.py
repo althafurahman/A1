@@ -152,9 +152,9 @@ class TaskRunner:
             "tool": name, "tool_input": tool_input[:20_000], "tool_output": tool_output[:8_000],
         })
 
-    async def _call(self, system, user, phase):
+    async def _call(self, system, user, phase, max_tokens=24_576):
         try:
-            rec = await self.client.complete(system, user)
+            rec = await self.client.complete(system, user, max_tokens=max_tokens)
             rec["phase"] = phase
             self._trace_llm(rec)
             return rec["response"]
@@ -201,8 +201,11 @@ class TaskRunner:
             return f"error: {clean_status(e)}"
         code = extract_code(reply)
         produced_any = False
+        token_budget = 24_576
         for attempt in range(MAX_REPAIRS + 1):
             if code is None:
+                # usually mid-think truncation on hard tasks: give the retry more room to finish
+                token_budget = 45_000
                 result = {"ok": False, "stdout": "",
                           "stderr": "Your reply contained no ```python code block. "
                                     "Reply with the complete script in exactly one ```python block."}
@@ -223,7 +226,8 @@ class TaskRunner:
                     return "ok"  # advisory issues at this point; a produced output beats the fallback
                 return f"error: code failed: {clean_status(result['stderr'], 150)}"
             try:
-                reply = await self._call(system, task_user + "\n\n" + REPAIR_USER.format(**result), "repair")
+                reply = await self._call(system, task_user + "\n\n" + REPAIR_USER.format(**result), "repair",
+                                         max_tokens=token_budget)
             except LLMError as e:
                 return "ok" if produced_any else f"error: {clean_status(e)}"
             code = extract_code(reply)
