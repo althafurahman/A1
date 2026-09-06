@@ -1,0 +1,1 @@
+How do I write a VBA code that can take a value from a merged cell in column A, such as the value 36354.4 in a merged cell that spans five rows starting from A4, divide it equally among the number of rows it spans, and then place the resulting value 7270.88 into each corresponding individual cell from B4 to B8?

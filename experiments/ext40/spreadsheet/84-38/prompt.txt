@@ -1,0 +1,1 @@
+In my 'Compare' sheet, I have data in columns A and B which I am trying to sort independently in ascending order using VBA. While column B sorts correctly, column A does not sort as intended. I have the results I want to achieve displayed in columns E and F. Can anyone correct my code to sort columns A and B independently?

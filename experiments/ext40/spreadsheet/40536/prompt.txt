@@ -1,0 +1,1 @@
+I need to calculate a value in cell C3 of my Excel worksheet by multiplying the number of non-blank cells within the range C6:C11 with the value in cell C2. What formula should I use?

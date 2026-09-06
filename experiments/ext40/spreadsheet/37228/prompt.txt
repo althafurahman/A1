@@ -1,0 +1,1 @@
+How can I return the delivery window based on the specified window in Column E, handling stores with either one or two delivery windows without altering the existing string, using Excel formulas?

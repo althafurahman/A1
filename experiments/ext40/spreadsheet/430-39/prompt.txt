@@ -1,0 +1,1 @@
+How can I write a macro to transpose columns F:O into columns B:E in Excel, with specific columns transposed into specific target columns, and then clear the original columns F:O after the transposition? My current macro attempt results in a 'selection is not Valid' runtime error. I've also included an example sheet titled 'Final Result' to show the desired outcome.

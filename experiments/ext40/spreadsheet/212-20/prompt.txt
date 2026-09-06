@@ -1,0 +1,1 @@
+How can I split the text in an Excel cell into separate rows in cells from the B column when the text is separated by two or more new lines, as shown in the attached file?

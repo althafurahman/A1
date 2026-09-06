@@ -1,0 +1,1 @@
+How can I create a VBA macro that will append '-001' to the end of each item name in column D, as this will be included in a larger project later on?
