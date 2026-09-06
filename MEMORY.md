@@ -116,6 +116,25 @@ on non-ok status; completed answers were never re-rolled.
   about 5000-row ranges before emitting code; init copies stand in, status honest).
 - Night's spend: ~7.6M output tokens, ≈$45. Total credits used to date ≈$55 of $1,000.
 
+## Failure taxonomy of the 52 fails (morning, from results.json + traces)
+
+20 near-miss (≥90% of cells right), 20 partial, 12 zero-correct. Notable honest findings:
+- The strip-whitespace hygiene rule cuts both ways: 290-27 expected 'GG ' (trailing space kept
+  in golden), 341-40 expected ' Sales' (leading space) — we strip and lose those cells, while
+  the same rule won 230-16 on dev16. Net effect unknowable without golden access; disclosed.
+- 269-43: golden stores dates as TEXT ('2022/01/26'); our real-datetime rule loses there.
+  The reverse of the baseline's dates-as-text failure — some goldens genuinely want text.
+- 41-47: 6395/6403 cells right, missing 8 'TOTAL' label rows.
+- 118-50, 42216 (the 2 no-answer errors): model exhausts 24576 tokens mid-think before emitting
+  code. Morning fix: the no-code-block repair retry now escalates max_tokens to 45k (context
+  clamp still protects the ceiling). Errored-id re-run in `experiments/error-retry-001/` —
+  same disclosed policy as the night segments; completed answers never re-rolled.
+  OUTCOME: both still fail at 45k (118-50 never emits code; 42216's script arrives truncated
+  mid-line) — a genuine capability edge of the 27B on these two tasks, not a budget problem.
+  Submitted artifacts unchanged; the escalation fix stays in the code where it can help the
+  judges' holdout run. Note: 118-50's graded region is ~10k cells of which only 22 differ from
+  the init workbook — one reason cell_accuracy (0.9729) sits far above pass_rate.
+
 ## Collaboration
 
 Claude Code (user's session) edited on branch `baseline-setup`: `.gitignore`, `MEMORY.md`, `research/` import. Second Claude Code session (this one) rebased the `a1/` harness work onto `baseline-setup` and pushed; it currently claims `a1/*`, root `README.md`, `MEMORY.md`. SUBMISSION.md claim settled: the 00:45 draft and the post-run scores were merged during the 04:30 rebase; no file currently claimed. Before concurrent edits, record owner and files here, then release when finished. Do not duplicate paid experiments.
