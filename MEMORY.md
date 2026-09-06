@@ -116,6 +116,25 @@ on non-ok status; completed answers were never re-rolled.
   about 5000-row ranges before emitting code; init copies stand in, status honest).
 - Night's spend: ~7.6M output tokens, ≈$45. Total credits used to date ≈$55 of $1,000.
 
+## LoRA SFT experiment (user's session, branch `lora-sft`, 2026-09-06 04:40-06:00)
+
+Goal: a model-side improvement feasible in the remaining hours, following the Tinker talk's text-to-SQL lesson (put task expertise into weights, cut test-time scaffolding). RL was ruled out by arithmetic (one GRPO step at ~15k thinking tokens per sample is ~8M tokens, ~18 h at the shared rate). Chosen: rejection-sampling SFT on the harness's own verified outputs, trained to emit the script with an empty think block.
+
+- Data: `scripts/build_sft.py` rebuilt the exact inference prompt for every task that PASSED in the 400 run and is not in `experiments/heldout78.ids` (78 stratified held-out ids incl. dev16); target = the code/repair reply that produced the last successful script. 258 examples, 665k tokens (median 1,852/example), 17 skipped as too long, 5 without a usable reply, 10 samples hand-audited (all read the workbook, none hard-code answers). Golden files were used only to SELECT examples; disclosed in SUBMISSION.md.
+- Training: `scripts/train_sft.sh sft-001` = cookbook `chat_sl` recipe, `Qwen/Qwen3.8-27B`, LoRA rank 32, lr 2e-4, batch 32, 2 epochs = 16 steps, 1.34M elapsed tokens, ~4 s/step, final train NLL 0.205 (from 0.228). Checkpoint (no TTL): `tinker://17741918-b3a7-5ae6-bf92-9556e1033720:train:0/sampler_weights/final`. Cost about $6.
+- Evaluation `experiments/heldout78-sft-001/` (same harness, `--model-path`, concurrency 16, ~10 min, ~$3.5) vs the base model's own results on the same 78 ids from the 400 run:
+
+  | | base model | fine-tuned |
+  |---|---|---|
+  | pass | 68/78 | 52/78 |
+  | cell-level / sheet-level pass | 35/40, 33/38 | 27/40, 25/38 |
+  | cell_accuracy | ~0.97 | 0.986 |
+  | mean output tokens/task | 18,104 | 1,313 |
+  | mean model seconds/task | 335 | 50 |
+  | mean model calls/task | 2.28 | 3.47 |
+
+- Reading: the fine-tune keeps the code style and speed (14x fewer tokens, 7x faster) but loses the reasoning that decides *what* to compute: failures are interpretation errors (wrong count rule, wrong rows), not truncation or plumbing; 20 of 26 failures are partial (high cell accuracy). Because verify/repair use the same no-think model, the verifier also weakened: it passed 12 of the 26 failing outputs, and 9 tasks looped through repair without converging. Won 2 tasks the base missed (51090, 37900), lost 18.
+- Decision per the pre-agreed gate (within 2 tasks of base): NOT used for the submission. The base-model 400 run on `main` stands. Documented as an experiment. Natural follow-ups (not attempted, no time): cascade (fine-tuned first, base model when the verifier rejects), keep the base model for the verify phase, or SFT targets that retain a short thinking trace.
 ## Failure taxonomy of the 52 fails (morning, from results.json + traces)
 
 20 near-miss (≥90% of cells right), 20 partial, 12 zero-correct. Notable honest findings:
