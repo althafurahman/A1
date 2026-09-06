@@ -13,7 +13,7 @@ def clean_status(text: str, cap: int = 180) -> str:
 import openpyxl
 
 from .coderun import extract_code, run_code
-from .llm import LLMError
+from .tinker_llm import LLMError
 from .sbio import answer_cells, read_answer_region
 from .serialize import serialize_workbook
 

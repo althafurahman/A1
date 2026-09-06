@@ -12,31 +12,24 @@ resolution-markers = [
 
 [[package]]
 name = "a1"
-version = "0.1.0"
+version = "1.0.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "httpx" },
     { name = "numpy" },
     { name = "openpyxl" },
     { name = "pandas" },
-]
-
-[package.optional-dependencies]
-tinker = [
     { name = "tinker" },
     { name = "tinker-cookbook" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "httpx", specifier = ">=0.27" },
     { name = "numpy", specifier = ">=2.0" },
     { name = "openpyxl", specifier = ">=3.1" },
     { name = "pandas", specifier = ">=2.2" },
-    { name = "tinker", marker = "extra == 'tinker'", specifier = ">=0.27.1" },
-    { name = "tinker-cookbook", marker = "extra == 'tinker'", specifier = ">=0.5.7" },
+    { name = "tinker", specifier = ">=0.27.1" },
+    { name = "tinker-cookbook", specifier = ">=0.5.7" },
 ]
-provides-extras = ["tinker"]
 
 [[package]]
 name = "aiohappyeyeballs"

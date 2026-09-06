@@ -5,12 +5,10 @@ model genuinely good at real spreadsheet work. The benchmark is SpreadsheetBench
 Verified — 400 tasks scraped from Excel forums. Workbook in, workbook out, graded
 cell-for-cell against a golden workbook after recalculation.
 
-**Status:** harness implemented and measured on the dev16 subset — 14/16 pass
-(cell accuracy 0.9865) vs 10/16 for the unchanged one-shot baseline, with both remaining
-failures fixed and confirmed individually afterwards. Full-400 run not yet launched
-(team decision pending). Project docs: [PROJECT.md](PROJECT.md), [BASELINE.md](BASELINE.md),
-[MEMORY.md](MEMORY.md); shared development instructions in [AGENTS.md](AGENTS.md)
-([CLAUDE.md](CLAUDE.md) for Claude Code).
+**Result:** pass_rate **0.870** on all 400 tasks (cell accuracy 0.9729), against the
+59.0% one-shot reference baseline. Method, scores and artifact paths:
+[SUBMISSION.md](SUBMISSION.md). Dated lab notebook of every run, failure category and
+decision: [MEMORY.md](MEMORY.md).
 
 ## Approach
 
@@ -30,7 +28,6 @@ a1/                 harness source
   harness.py        per-task pipeline: code agent, repair, verify, fallback
   serialize.py      answer-region-aware workbook serialization
   coderun.py        sandboxed execution of model-written scripts
-  llm.py            chat-completions client for the team's model endpoint
   tinker_llm.py     Tinker sampling backend (primary model access)
   sbio.py           dataset + answer-range plumbing
 experiments/        dev-set runs and results (dev16 comparisons, fix checks)
@@ -43,8 +40,8 @@ SUBMISSION.md       method write-up, models, scores
 ## Run
 
 ```sh
-uv sync --extra tinker
-uv run python -m a1.run --backend tinker --dataset-dir <dataset> --out-dir <out> [--ids 13-1,51-12]
+uv sync
+uv run python -m a1.run --dataset-dir <dataset> --out-dir <out> [--ids 13-1,51-12]
 ```
 
 Or via Docker (the judge contract):

@@ -1,14 +1,15 @@
-"""Tinker sampling backend: same .complete() contract as llm.Client.
-
-Used for two things: harness development before the endpoint credentials exist, and running
-the pipeline against a fine-tuned sampler checkpoint (tinker://.../sampler_weights/...).
-Requires TINKER_API_KEY. Install: uv sync --extra tinker
+"""Tinker sampling client for the fixed competition model or a fine-tuned checkpoint
+(tinker://.../sampler_weights/...). Requires TINKER_API_KEY and TINKER_PROJECT_ID.
 """
 
 import asyncio
 import time
 
-from .llm import LLMError, TRACE_PROMPT_CAP
+TRACE_PROMPT_CAP = 20_000  # SUBMISSION.md allows truncating workbook serialisations in traces
+
+
+class LLMError(Exception):
+    pass
 
 
 class TinkerClient:

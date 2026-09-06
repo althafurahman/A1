@@ -1,7 +1,0 @@
-Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-A1 backend=tinker model=Qwen/Qwen3.8-27B strategy=full tasks=2 concurrency=2
-118-50   error: error: code failed: Your reply contained no ```python code block. Reply with the complete script in exactly one ```python block.; direct fallback failed: no JSON in reply: 'We need answer JSON with cells C2:D5000 after applying instruction. Ne
-42216    error: error: code failed: Traceback (most recent call last): File "/private/var/folders/9n/79xlr4ss7zsbltgf3z0hj4xw0000gn/T/tmp7suvltrt/script.py", line 43, in <module> md = mo; direct fallback failed: no JSON in reply: 'Let me carefully analyze thi
-finished: 2/2 predictions written
-Task was destroyed but it is pending!
-task: <Task pending name='tinker_session_futures_poller' coro=<SessionFuturesPoller._poll_loop() done, defined at /Users/althafu/Projects/ylookup-hackathon/A1/.venv/lib/python3.14/site-packages/tinker/lib/session_futures_poller.py:121> wait_for=<Future pending cb=[Task.task_wakeup()]>>

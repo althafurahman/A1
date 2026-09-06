@@ -1,2 +1,0 @@
-/Users/althafu/Projects/ylookup-hackathon/encode-hackathon/research/.venv/lib/python3.14/site-packages/openpyxl/worksheet/_reader.py:329: UserWarning: Data Validation extension is not supported and will be removed
-  warn(msg)

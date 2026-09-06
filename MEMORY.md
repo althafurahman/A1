@@ -95,8 +95,8 @@ JSON-answer fallback only if the code path produced no output at all. Backend: T
 
 Final score, shipped evaluator, `--all`, recalculation on: **pass_rate 0.870, cell_accuracy
 0.9729, cell-level 0.9091, sheet-level 0.784** (items 400, missing 0). Artifacts at repo root
-(`predictions.jsonl`, `outputs/`, `traces/`, `run.log`, `results.json`); merged set also kept
-in `experiments/submission-run/`.
+(`predictions.jsonl`, `outputs/`, `traces/`, `run.log`, `results.json`; the merged set was
+consolidated to the repo root during cleanup).
 
 Chronology (disclosed in SUBMISSION.md): the run executed in four segments, merged last-wins
 on non-ok status; completed answers were never re-rolled.

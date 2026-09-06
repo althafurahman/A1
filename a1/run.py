@@ -3,7 +3,7 @@
     python -m a1.run --dataset-dir /data --out-dir /out [--ids 13-1,51-12] [--concurrency 8] [--strategy full]
 
 Reads dataset.json + init workbooks from --dataset-dir, writes predictions.jsonl,
-outputs/, traces/ and run.log into --out-dir. Needs A1_API_BASE and A1_API_KEY.
+outputs/, traces/ and run.log into --out-dir. Needs TINKER_API_KEY and TINKER_PROJECT_ID.
 """
 
 import argparse
@@ -15,8 +15,8 @@ import sys
 from pathlib import Path
 
 from .harness import TaskRunner
-from .llm import MODEL, Client
 from .sbio import load_dataset
+from .tinker_llm import TinkerClient
 
 
 def load_env():
@@ -38,16 +38,12 @@ def parse_args():
     p.add_argument("--concurrency", type=int, default=8)
     p.add_argument("--strategy", choices=["full", "code", "direct"], default="full",
                    help="full = code agent + verify + direct fallback; others for ablations")
-    p.add_argument("--model", default=os.environ.get("MODEL", MODEL),
-                   help="override for ablations only; the submission model is fixed")
-    p.add_argument("--backend", choices=["api", "tinker"], default="api",
-                   help="api = the team's chat-completions endpoint (A1_API_BASE); tinker = Tinker sampling")
-    p.add_argument("--base-model", default="Qwen/Qwen3.8-27B", help="tinker backend: tokenizer/renderer base")
-    p.add_argument("--model-path", help="tinker backend: tinker://... sampler checkpoint")
+    p.add_argument("--base-model", default="Qwen/Qwen3.8-27B", help="tokenizer/renderer base model")
+    p.add_argument("--model-path", help="tinker://... sampler checkpoint (default: sample the base model)")
     return p.parse_args()
 
 
-ALLOWED_MODEL = "qwen3.8-27b"  # competition rule: this model only, every backend, fine-tunes included
+ALLOWED_MODEL = "qwen3.8-27b"  # competition rule: this model only, fine-tunes of it included
 
 
 def check_model_allowed(name: str, out_dir: Path):
@@ -86,14 +82,9 @@ async def main():
         wanted = {i.strip() for i in args.ids.split(",") if i.strip()}
         tasks = [t for t in tasks if t["id"] in wanted]
 
-    if args.backend == "tinker":
-        from .tinker_llm import TinkerClient
-        client = TinkerClient(base_model=args.base_model, model_path=args.model_path)
-        check_model_allowed(args.base_model, out_dir)
-    else:
-        client = Client(model=args.model)
-        check_model_allowed(args.model, out_dir)
-    log(out_dir, f"A1 backend={args.backend} model={client.model} strategy={args.strategy} "
+    client = TinkerClient(base_model=args.base_model, model_path=args.model_path)
+    check_model_allowed(args.base_model, out_dir)
+    log(out_dir, f"A1 model={client.model} strategy={args.strategy} "
                  f"tasks={len(tasks)} concurrency={args.concurrency}")
     semaphore = asyncio.Semaphore(args.concurrency)
 
