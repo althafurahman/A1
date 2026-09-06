@@ -1,221 +1,139 @@
-# A1 lab notebook
+# A1 lab notes
 
-Chronological record of the weekend: what we did at each stage, what we observed, and what
-we decided to do next. All runs referenced here are committed under `experiments/` or
-`research/submissions/` with their `results.json`.
+How we got from the 59% one-shot baseline to the submitted harness, stage by stage:
+the approach at each point, what we found, and what we changed because of it. The runs
+mentioned here are committed under `experiments/` and `research/submissions/`, each with
+its `results.json`.
 
----
+## 1. Trust the grader before trusting any score
 
-## 1. Setup and evaluation plumbing — Sat afternoon
+Before calling a model we checked the measuring stick: the oracle evaluation (golden
+against golden) scores a perfect 1.0 on all 400 tasks, and LibreOffice recalculation
+returns correct values for formulas written without cached results. We also profiled the
+dataset: a fifth of the workbooks are bigger than the text preview the starter baseline
+shows the model, most answers span many cells, and a quarter of the workbooks have
+multiple sheets. That profile ended up predicting most of what followed.
 
-**Steps.** Imported the official starter byte-identical into `research/` (upstream commit
-`37d9016`, verified with `diff -r`; see `research/UPSTREAM.md`). Installed the toolchain
-(uv, Python 3.13, tinker 0.27.1, openpyxl 3.1.5, LibreOffice 26.8, Docker 29.1), downloaded
-the 400-task dataset (checksum OK), and validated the grader before any model call:
-`evaluate.py --oracle` and a LibreOffice recalculation round-trip on a formula with no
-cached value.
+## 2. Reproduce the baseline and study how it fails
 
-**Observations.** Oracle scored 1.0 on all 400, recalculation returned the correct number —
-the scoring pipeline is trustworthy. Confirmed the permitted model id on the Tinker models
-page: `Qwen/Qwen3.8-27B` (~$1.86/M prefill, $5.60/M sample; renderer
-`qwen3_8_xhigh_reasoning`). First Tinker call failed with `400 This project is read-only`
-until `TINKER_PROJECT_ID` was set (org default project is read-only; log in
-`research/submissions/baseline-smoke-001/console.log`). Profiled the dataset: 80/400
-workbooks exceed the starter's 120×30 serialisation window; 359/400 answers are multi-cell
-ranges; 105 workbooks are multi-sheet.
+We ran the unchanged starter baseline on a stratified 16-task dev subset (four per bucket:
+cell vs sheet tasks, small vs large answer ranges). It passed 10/16, with cell accuracy
+barely over half. Reading the traces, the failures fell into clear buckets:
 
-**Next steps.** Reproduce the unchanged baseline before touching anything; smoke test on 2
-tasks, then a stratified dev subset.
+- **Truncation.** The model thinks at length, and either never finishes reasoning or runs
+  out of budget while typing hundreds of answer cells as JSON.
+- **Value typing.** Dates come back as text; goldens hold real datetimes.
+- **Manipulation errors.** Sheet-level tasks end up shifted by a row, or with the wrong
+  rows deleted.
 
-## 2. Baseline reproduction — Sat evening
+The pattern told us the problem wasn't reasoning quality so much as the *format of the
+answer*: forcing a model to re-emit a spreadsheet as text is the bottleneck.
 
-**Steps.** Ran the unchanged starter (`baseline/tinker_predict.py`, temperature 0) on tasks
-13-1 and 51-12 at the default `--max-tokens 8192` (`baseline-smoke-002`), then at 24576
-(`baseline-smoke-003`). Built `experiments/dev16.ids` — 16 tasks, 4 per bucket
-(cell/sheet × small/large answer range), seeded, excluding smoke ids — and ran the baseline
-on it (`research/submissions/dev16-baseline-001`).
+## 3. Build a code-executing agent instead
 
-**Observations.** At 8192 both smoke tasks truncated *inside the think block* — zero JSON,
-pass_rate 0.0 (~103 s/task). At 24576: 51-12 PASS; 13-1 101/120 — all 19 misses were dates
-returned as text where the golden holds real datetimes. Value typing at write time, not
-reasoning. Dev16 baseline: **10/16 pass (62.5%), cell_accuracy 0.516**, cell-level 7/8,
-sheet-level 3/8 (~20 min, ~$0.85). Failure categories from the traces: truncation ×2
-(one never finished reasoning; one ran out of tokens while *enumerating a 190-cell JSON*),
-row-shift ×2, misread ×1, near-miss ×1. Throughput ~118 tok/s aggregate at concurrency 8 —
-read at the time as a project rate cap (later disproved, §6). Same prompt gave different
-token counts across runs: sampling varies even at temperature 0.
+Our harness has the model write a short Python script rather than the answer itself. The
+model sees a serialisation of the workbook that always includes the answer region, the
+head and tail of every sheet, and the formulas; the script opens the real workbook,
+computes, and writes plain values into the graded cells. Failures feed back: script
+errors return to the model for repair, mechanical checks reject formula strings, and a
+verification step reviews what was written before we accept it. Only if the script path
+produces nothing at all do we fall back to a direct JSON answer.
 
-**Next steps.** The failure taxonomy points away from prompt-polish and toward a
-code-executing agent: sheet-level tasks fail because the model must re-emit every cell as
-text. Build the agent; test one change at a time against dev16.
+Same dev subset: 14/16, cell accuracy 0.99. Both baseline truncation failures now pass —
+a script doesn't need to enumerate cells. The two remaining failures were near-misses:
+one task written with trailing whitespace in text values, one with two cells left empty.
 
-## 3. Code-executing harness — Sat evening
+## 4. Fix exactly what the dev set exposed
 
-**Steps.** Implemented `a1/`: the model receives an answer-region-aware serialisation
-(head, tail and answer rows of every sheet, values plus a formula overlay) and writes one
-Python script that opens the real workbook, computes, and writes plain values into the
-graded region. Script runs in a scratch directory; stderr feeds a bounded repair loop (2);
-mechanical hygiene checks catch formula strings; a verification call reviews the written
-region; a direct JSON fallback runs only if the code path produced nothing. Smoke on the
-same 2 baseline tasks, then dev16 (`experiments/dev16-a1-001`, concurrency 6).
+Two targeted changes, each validated on the task that motivated it:
 
-**Observations.** Smoke: both PASS, including 13-1's date cells (scripts write real
-datetimes). Dev16: **14/16 (87.5%), cell_accuracy 0.9865**, cell-level 8/8, sheet-level 6/8;
-34 model calls, 207k output tokens, ~24 min, ~$1.29. The two baseline truncation failures
-(57232, 183-8) now pass — scripts don't enumerate cells. Both remaining failures were
-near-misses: 230-16 wrote text values with trailing whitespace (7/12); 156-14 left two
-cells empty (154/156).
+- A whitespace rule plus a mechanical check that sends padded text back for repair.
+- A stronger verifier: it now lists empty cells explicitly and sees the answer region
+  *before and after* the script ran, which is what finally catches row-shifted output.
+  (We learned this the hard way — a re-run of the whitespace task produced clean values
+  in the wrong rows, and the old verifier waved it through.)
 
-**Next steps.** Two targeted fixes, each validated on the exact task it addresses:
-a whitespace hygiene check, and a verifier that can see what changed.
+Final config on the dev subset: 15/16. The one miss had passed in an earlier run;
+sampling varies a little even at temperature zero, for the baseline as much as for us.
 
-## 4. Targeted fixes and confirmation — Sat night
+## 5. Package the way judges will run it
 
-**Steps.** Added a strip-whitespace value rule plus a mechanical check that routes padded
-text into the repair loop; made the verifier list EMPTY cells explicitly and show the
-answer region BEFORE (init) and AFTER (output) side by side; kept produced outputs over
-the fallback; missing answer sheets are created by name rather than writing to the active
-sheet. Re-ran the two failed tasks (`fix-check-001`, `fix-check-002`), then the whole
-dev16 with the final config (`dev16-a1-002`).
+The pipeline executes model-written code, so it ships as a Docker container reading the
+dataset read-only and writing all artifacts to an output mount. We trimmed the image to
+about 2 GB (CPU-only torch, tokenizer baked in so start-up needs no external downloads)
+and verified the exact judge command end to end: outputs, traces with every required
+field, and no golden values anywhere in prompts or traces.
 
-**Observations.** 156-14: PASS 156/156 (the EMPTY-cell surfacing caught it). 230-16 first
-*regressed* to 2/12 via a differently-sampled script that shifted the region one row —
-which is precisely what the before/after comparison was built for; with it, 230-16 PASS
-12/12 first attempt. Final-config dev16: **15/16 (93.75%), cell_accuracy 0.971**; the sole
-miss (183-8) had passed in the previous run — temperature-0 sampling wobble, same as the
-baseline exhibits. Every dev16 task passed with the final config in at least one run.
-A full review of the branch also surfaced 15 verified findings (forbidden-model defaults
-in starter docs, env/doc bugs, grader quirks such as noon-datetime rounding and an
-inconsistent cell_accuracy denominator); doc-level items were fixed, and the affected
-internal planning files were later removed in cleanup.
+## 6. The full 400
 
-**Next steps.** Freeze the solver config. Verify the Docker judge contract, then decide as
-a team when to spend the credits on the full 400.
+The full run taught us two things mid-flight. First, the model is served with a 64k
+context — far smaller than we had assumed — so the biggest workbooks overflowed; we
+added a clamp and an adaptive serialisation that shrinks until the prompt fits. Second,
+throughput scales with concurrency far better than our early measurements suggested, so
+the run finished overnight rather than in the ten hours we had budgeted.
 
-## 5. Docker and submission prep — Sun 01:00–01:35
+The run completed in segments (twice interrupted by our own machine, not the pipeline);
+tasks that had errored were re-run after the context fix, and completed answers were
+never re-rolled. Final, from the shipped evaluator over all 400 tasks:
 
-**Steps.** Built the container and ran it exactly per the judge contract (`/data`
-read-only, empty `/out`, keys via env) on two tasks. Hardened the image: CPU-only torch
-wheel index and the Qwen3.8 tokenizer baked at build time. Wrote `scripts/finalize.sh`
-(score with `--all`, copy artifacts to root, grep traces for `golden`) and
-`scripts/analyse_run.py` (per-task calls/tokens/time, failure buckets).
+**pass rate 0.870 — cell accuracy 0.9729 — cell-level 0.909, sheet-level 0.784**
 
-**Observations.** Both tasks PASS through the container; traces carry every required field;
-no `golden` string in any prompt or trace. Image size 9.75 GB → 2.06 GB. Cost profile: a
-1-cell task spent 17,929 output tokens (366 s) in its code call at the default (xhigh)
-reasoning effort — reasoning effort is the dominant time lever.
+Two tasks produced no answer at all: on huge answer ranges the model exhausts its token
+budget reasoning before it ever emits code. We widened the retry budget afterwards and
+they still fail — that is a genuine capability edge of this model, not a configuration
+problem, and we left the artifacts honest rather than paper over it.
 
-**Next steps.** Launch the full 400 overnight — starting late enough that the shared
-Tinker pool is quiet, early enough to leave scoring margin.
+## 7. Fine-tuning: tried, measured, not used
 
-## 6. The full-400 run — Sun 00:39–03:50 (submitted artifacts)
+We trained a LoRA on 258 of our own verified prompt-to-script pairs (held out 78
+stratified tasks that were never trained on; goldens influenced only which examples were
+*selected*, and that is disclosed). The result was a clean trade-off: the fine-tuned
+model writes scripts with 14× fewer tokens and 7× faster, but passes 52/78 against the
+base model's 68/78 — it keeps the style and loses the reasoning about *what* to compute.
+It also weakens the verifier, which shares the model. We had agreed a gate in advance
+(within two tasks of base) and it missed by a distance, so the submission uses the base
+model. The checkpoint and training details are in SUBMISSION.md.
 
-**Steps.** Launched at concurrency 16. The run ultimately executed in four segments,
-merged last-wins on non-ok status; completed answers were never re-rolled. Scored with the
-shipped evaluator, `--all`, recalculation on.
+## 8. Where it still fails, honestly
 
-**Observations.**
-- Segment 1 (253/400, then killed externally): throughput reached 470→820 tok/s aggregate —
-  the assumed ~140 tok/s cap was wrong; throughput scales with concurrency and off-peak
-  hours. 17 errors, dominated by context-window overflows on giant workbooks: Tinker serves
-  the model with a **64k context**, not the 1M a public listing suggested.
-- Mid-run fix (commit `a76d3a5`, solver prompts unchanged for normal tasks): clamp
-  max_tokens to the measured window, shrink the serialisation on overflow
-  (120k→45k→16k chars), route no-code-block replies through the repair nudge.
-- Segments 2–3: two external process kills traced to the local task supervisor (machine
-  never slept; not OOM). Lesson: long paid runs must be nohup-detached. Segment 4
-  (detached, concurrency 16) finished 144 tasks without interruption; the former overflow
-  errors (80-42, 209-30, 455-35, 41-47…) passed with the fix.
-- **Final: pass_rate 0.870 (348/400), cell_accuracy 0.9729, cell-level 0.9091, sheet-level
-  0.784. items 400, missing 0.** 2/400 produced no answer (118-50, 42216 — the model
-  exhausts its budget thinking about 5000-row ranges before emitting code; init copies
-  stand in, status honest). Night's spend ~7.6M output tokens, ≈$45.
+Of the 52 failed tasks, twenty are near-misses with over 90% of cells correct. The
+recurring causes taught us something about the benchmark as much as the harness:
 
-**Next steps.** Morning: failure analysis of the 52 fails; a fine-tuning experiment if the
-arithmetic allows; a generalisation check on tasks outside the Verified 400.
+- Our strip-whitespace rule wins some tasks and loses others — some goldens genuinely
+  keep leading or trailing spaces copied from source data.
+- Our dates-as-real-datetimes rule is usually right, but some goldens store dates as
+  text: the exact inverse of the baseline's classic failure.
+- A cluster of fails are empty header or label cells the script never wrote.
 
-## 7. LoRA SFT experiment — Sun 04:40–06:00 (not used at inference)
+## 9. Does it generalise?
 
-**Steps.** RL was ruled out by arithmetic (one GRPO step ≈ 8M thinking tokens, ~18 h at
-the shared rate). Instead: rejection-sampling SFT on the harness's own verified outputs,
-trained to emit the script with an empty think block. `scripts/build_sft.py` rebuilt the
-exact inference prompt for every task that passed the 400 run and is outside the 78
-stratified held-out ids: 258 examples, 665k tokens, 10 hand-audited (all read the
-workbook; none hard-code answers; golden files used only to *select* examples —
-disclosed). Trained LoRA rank 32, lr 2e-4, 2 epochs = 16 steps (~$6); evaluated the
-checkpoint through the same harness on the 78 held-out tasks (`heldout78-sft-001`).
+We built a 40-task set from the original SpreadsheetBench pool (tasks outside the
+Verified 400) and ran the submitted harness on it: 26/40, against 87% on the Verified
+set. Discounting the whitespace/text-date self-inflictions and a few label-noise cases in
+that unverified pool, we estimate a real generalisation gap of roughly 12–15 points,
+concentrated in cell-level lookup and conditional-sum tasks. That number is in the repo
+because knowing where the harness is weak matters more than pretending it isn't.
 
-**Observations.** Fine-tuned: **52/78** vs base **68/78** — but at **1,313 vs 18,104
-output tokens/task (14×) and 50 vs 335 s/task (7×)**. The fine-tune keeps the code style
-and speed but loses the reasoning that decides *what* to compute: failures are
-interpretation errors, 20 of 26 partial. Side effect: verify/repair share the no-think
-model, so the verifier weakened too (passed 12 of the 26 failing outputs). Won 2 tasks the
-base missed, lost 18. Final train NLL 0.205; checkpoint (TTL cleared)
-`tinker://17741918-b3a7-5ae6-bf92-9556e1033720:train:0/sampler_weights/final`.
+## Submitted state
 
-**Next steps (not attempted, out of time).** Cascade: fine-tuned model first, base model
-when the verifier rejects; keep the base model for the verify phase; SFT targets that
-retain a short thinking trace.
+The repo root holds the full-400 artifacts (`predictions.jsonl`, `outputs/`, `traces/`,
+`run.log`, `results.json` at 0.870 / 0.9729), the harness in `a1/`, and the verified
+Dockerfile. Model: Qwen3.8-27B via Tinker, temperature 0, no fine-tune at inference. One
+post-run code change (the wider retry budget) is declared in SUBMISSION.md alongside the
+run's commit. Total spend stayed well under a tenth of the credit budget.
 
-## 8. Failure taxonomy of the 52 fails — Sun morning
+## Future improvements
 
-**Steps.** Classified every failed task from `results.json` and its trace; re-ran the two
-no-answer errors under the disclosed errored-id policy after widening the retry token
-budget to 45k (`error-retry-001`; commit `46fb92d`, declared in SUBMISSION.md).
-
-**Observations.** 20 near-miss (≥90% cells right), 20 partial, 12 zero-correct.
-- The strip-whitespace rule cuts both ways: some goldens keep source padding
-  (290-27 `'GG '`, 341-40 `' Sales'`) — we strip and lose those cells, while the same rule
-  won 230-16 on dev16.
-- Some goldens store dates as *text* (269-43 `'2022/01/26'`) — the exact inverse of the
-  baseline's dates-as-text failure.
-- 41-47: 6395/6403 cells right, missing 8 'TOTAL' label rows. Across the 400: 7 fails
-  trace to whitespace-strip, 4 to text-date conversion, 18 to empty header/label cells.
-- The two no-answer tasks still fail at 45k tokens (118-50 never emits code; 42216's
-  script arrives truncated mid-line): a genuine capability edge of the 27B, not a budget
-  problem. Submitted artifacts unchanged; the wider budget stays in the code. 118-50's
-  graded region is ~10k cells of which only 22 differ from the init workbook — one reason
-  cell_accuracy sits far above pass_rate.
-
-**Next steps.** Draft value-rule refinements (below) and check generalisation before
-touching anything else.
-
-## 9. ext40 generalisation check — Sun 03:00–05:09
-
-**Steps.** Built `experiments/ext40`: 40 unseen tasks sampled (seed 1) from the original
-SpreadsheetBench 912 pool (CC BY-SA 4.0) that are not in the Verified 400 —
-512 candidates filtered to 353 eligible, 10 per bucket, renamed to the Verified layout,
-oracle 1.0 on 40/40. Ran the submitted harness on it (`ext40-base-001`, ~$6.5).
-
-**Observations.** **26/40 (65%), cell_accuracy 0.863** vs 87% on the Verified 400. Of the
-14 fails: 2 whitespace-strip, 1 case-sensitivity, 1 harness error, ~2–3 look like golden
-quirks of the unverified pool; the rest are genuinely wrong values, concentrated in
-cell-level formula tasks (lookups, conditional sums). Honest read: **~12–15 points of real
-generalisation gap** beyond self-inflicted rules and label noise. Run-to-run variance
-~3–4 tasks per 40. Caveat: the leftover pool is unverified, so ext40 scores are best used
-relatively, between configs.
-
-**Next steps.** A `prompt-fixes` branch (copy-verbatim value rules, source-aware
-whitespace check, medium-effort retry) recovers 19/52 of the 400's failures but is neutral
-on ext40 (25 vs 26) — evidence it needs a proper two-run evaluation, so it is NOT merged
-into the submission.
-
-## 10. Final status — Sun 09:15
-
-The submission is `main`: root `predictions.jsonl`, `outputs/`, `traces/`, `run.log`,
-`results.json` are the full-400 run (0.870 / 0.9729). Model `Qwen/Qwen3.8-27B` via Tinker,
-temperature 0, no fine-tune at inference. Docker image verified against the judge contract
-(2.06 GB, tokenizer baked). The one post-run code change and the SFT experiment are both
-declared in SUBMISSION.md. Credits: ~$55 (400 run) + ~$25 (dev/ext40/targeted) + ~$12
-(SFT), well under the $1,000 budget.
-
-## Future work
-
-1. Merge `prompt-fixes` (copy-verbatim rules for moved values; whitespace/type rules only
-   for newly computed ones) and evaluate with two full runs to beat sampling variance.
-2. An exploration turn before script-writing for cell-level lookup tasks — the largest
-   block of real ext40 failures.
-3. Formula mode: write formulas and recalculate with LibreOffice inside the container,
-   for tasks whose goldens preserve formula-produced text formats.
-4. The SFT cascade: fine-tuned model first for its 14× token efficiency, base model as
-   verifier and fallback — the experiment suggests speed and accuracy are separable.
+1. **Copy-verbatim value rules.** Values moved or copied from existing cells should be
+   copied exactly (type and whitespace); typing rules should apply only to newly computed
+   values. A draft branch recovers a third of the current failures on the 400 but is
+   neutral on the generalisation set — it needs a proper two-run evaluation before
+   merging, so it stayed out of the submission.
+2. **An exploration turn for lookup tasks.** Let the model inspect the workbook and probe
+   its structure before writing the final script — the biggest block of real
+   generalisation failures.
+3. **Formula mode.** Write formulas and recalculate inside the container for tasks whose
+   goldens preserve formula-produced text formats.
+4. **The fine-tune cascade.** Use the 14×-cheaper fine-tuned model first and escalate to
+   the base model when the verifier rejects — the experiment suggests speed and accuracy
+   are separable rather than opposed.
