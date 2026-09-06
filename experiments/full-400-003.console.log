@@ -1,0 +1,12 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+A1 backend=tinker model=Qwen/Qwen3.8-27B strategy=full tasks=154 concurrency=10
+9391     ok
+51090    ok
+531-18   ok
+15671    ok
+32562    ok
+9569     ok
+54196    ok
+36764    ok
+41-47    ok
+35739    ok
